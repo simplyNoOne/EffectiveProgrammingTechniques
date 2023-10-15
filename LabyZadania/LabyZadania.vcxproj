@@ -130,6 +130,8 @@
     <ClCompile Include="LabyZadania.cpp" />
     <ClCompile Include="Zestawy\Z1\CTable.cpp" />
     <ClCompile Include="Zestawy\Z1\z1.cpp" />
+    <ClCompile Include="Zestawy\Z2\CNumber.cpp" />
+    <ClCompile Include="Zestawy\Z2\z2.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ChildOne.h" />
@@ -137,6 +139,8 @@
     <ClInclude Include="ParentClass.h" />
     <ClInclude Include="Zestawy\Z1\CTable.h" />
     <ClInclude Include="Zestawy\Z1\z1.h" />
+    <ClInclude Include="Zestawy\Z2\CNumber.h" />
+    <ClInclude Include="Zestawy\Z2\z2.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

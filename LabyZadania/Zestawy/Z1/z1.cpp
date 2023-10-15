@@ -1,21 +1,21 @@
 #include "z1.h"
 
 
-void test();
+
 
 void vZ1start() {
 	//1
-	//vAllocTableFill34(6);
+	vAllocTableFill34(6);
 
 	//2 //no way there is a way to do it without reference????
 	int** piTable;
 	std::cout << bAllocTable2Dim(&piTable, 5, 3);
 
 	//3
-	//std::cout << bDeallocTable2Dim(&piTable, 5, 3);
+	std::cout << bDeallocTable2Dim(&piTable, 5, 3);
 
 	//4
-	/*CTable cTab1;
+	CTable cTab1;
 	cTab1.vSetName("one");
 	CTable* pcTab2 = new CTable(cTab1);
 	CTable* pcTab3 = new CTable("three", 7);
@@ -26,8 +26,7 @@ void vZ1start() {
 
 	delete pcTab2;
 	delete pcTab3;
-	delete pcTabClone;*/
-	test();
+	delete pcTabClone;
 }
 
 void vAllocTableFill34(int iSize) {
@@ -43,7 +42,7 @@ void vAllocTableFill34(int iSize) {
 			std::cout << piTable[i] << " ";
 		}
 		std::cout << "]\n";
-		delete[] piTable;
+		delete piTable;
 	}
 	else {
 		std::cout << "table size must be greater than 0!\n";
@@ -73,10 +72,10 @@ bool bDeallocTable2Dim(int*** piTable, int iSizeX, int iSizeY) {
 	}
 	for (int i = 0; i < iSizeX; i++) {
 		if ((*piTable)[i] != NULL) {
-			delete[] (*piTable)[i];
+			delete (*piTable)[i];
 		}		
 	}
-	delete[] *piTable;
+	delete *piTable;
 	
 	*piTable = NULL;
 	return true;
@@ -93,19 +92,3 @@ void vModTable(CTable cTab, int iNewSize) {
 	cTab.bSetNewSize(iNewSize);
 }
 
-
-void test() {
-
-	int ourInt = 6;
-
-	int* ptrToOurInt = &ourInt;
-
-	int** ptrToPtrToOurInt = &ptrToOurInt;
-
-	int* tab = new int[4];
-	int** ptr2Tab = &tab;
-
-	tab[1] = 3;
-	std::cout << *(tab + 1);
-
-}
