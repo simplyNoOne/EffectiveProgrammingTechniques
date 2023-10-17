@@ -39,6 +39,9 @@
     <ClCompile Include="Zestawy\Z2\CNumber.cpp">
       <Filter>Source Files\Zestawy\Z2</Filter>
     </ClCompile>
+    <ClCompile Include="Zestawy\Z1\z1Tools.cpp">
+      <Filter>Source Files\Zestawy\Z1</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Zestawy\Z1\z1.h">
@@ -61,6 +64,9 @@
     </ClInclude>
     <ClInclude Include="Zestawy\Z2\CNumber.h">
       <Filter>Source Files\Zestawy\Z2</Filter>
+    </ClInclude>
+    <ClInclude Include="Zestawy\Z1\z1Tools.h">
+      <Filter>Source Files\Zestawy\Z1</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

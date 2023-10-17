@@ -31,4 +31,11 @@ public:
 private:
 	int* piNumber;
 	int iLength;
+
+	//edit this so that my eyes don't bleed
+	/** Subtracts corresponding digits from 2 arrays; Returns true when loop was executed, false otherwise*/
+	bool  bExecuteSubtractionLoop(int iStart, int iStop, const int* piLhs, const int* piRhs, int* piLtR, int* piRtL, int* iCarryL, int* iCarryR);
+
+	int getResultingDigit(int iIndex, const int* piLhs, const int* piRhs, int* iCarry);
+
 };

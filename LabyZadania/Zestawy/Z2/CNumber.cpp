@@ -92,45 +92,34 @@ CNumber CNumber::operator-(CNumber& cValue)
 {
 	int iLenToTraverse = std::min(iLength, cValue.iLength);
 	int iMaxNumLen = std::max(iLength, cValue.iLength);
-	
+
+	int* piLhsSubRhs = new int[iMaxNumLen];
+	int* piRhsSubLhs = new int[iMaxNumLen];
+	int iCarryL = 0;
+	int iCarryR = 0;
+
+	bExecuteSubtractionLoop(0, iLenToTraverse, piNumber, cValue.piNumber, piLhsSubRhs, piRhsSubLhs, &iCarryL, &iCarryR);
+
 	CNumber cResult = CNumber();
 	cResult.iLength = iMaxNumLen;
-	cResult.piNumber = new int[iMaxNumLen];
+	cResult.piNumber = (iCarryL == 0) ? piLhsSubRhs : piRhsSubLhs;
 
-	int iCarry = 0;
-	int iDigitResult = 0;
-	for (int i = 0; i < iLenToTraverse; i++) {
-		iDigitResult = (piNumber[i] - iCarry - cValue.piNumber[i]);
-		if (iDigitResult < 0) {
-			iCarry = 1;
-			iDigitResult = iDecimalSystemBase + iDigitResult;
-		}
-		else {
-			iCarry = 0;
-		}
-		cResult.piNumber[i] = iDigitResult;
+
+	if (bExecuteSubtractionLoop(iLenToTraverse, cValue.iLength, NULL, cValue.piNumber, NULL, piRhsSubLhs, NULL, &iCarryR)){
+		cResult.piNumber = piRhsSubLhs;
 	}
 
-	int* piLongerNum = (iLength > cValue.iLength) ? piNumber : cValue.piNumber;
-	int iIter = iLenToTraverse;
-	while (iCarry != 0) {
-		iDigitResult = (piLongerNum[iIter] - iCarry );
-		if (iDigitResult < 0) {
-			iCarry = 1;
-			iDigitResult = iDecimalSystemBase + iDigitResult;
-		}
-		else {
-			iCarry = 0;
-		}
-		cResult.piNumber[iIter] = iDigitResult;
-		iIter++;
+	if(bExecuteSubtractionLoop(iLenToTraverse, iLength, piNumber, NULL, piLhsSubRhs, NULL, &iCarryL, NULL)) {
+		cResult.piNumber = piLhsSubRhs;
 	}
 
-	while (iIter < iMaxNumLen) {
-		cResult.piNumber[iIter] = piLongerNum[iIter];
-		iIter++;
+	if (cResult.piNumber == piRhsSubLhs) {
+		delete piLhsSubRhs;
 	}
-
+	else {
+		delete piRhsSubLhs;
+	}
+	
 	return cResult;
 }
 
@@ -153,7 +142,9 @@ CNumber CNumber::operator*(int iValue)
 
 CNumber CNumber::operator-(int iValue)
 {
-	return CNumber();
+	CNumber cConvertedValue;
+	cConvertedValue = iValue;
+	return *this - cConvertedValue;
 }
 
 CNumber CNumber::operator/(int iValue)
@@ -168,4 +159,44 @@ std::string CNumber::sToString()
 		ossResult<<piNumber[i];
 	}
 	return ossResult.str();
+}
+
+bool CNumber::bExecuteSubtractionLoop(int iStart, int iStop, const int* piLhs, const int* piRhs, int* piLtR, int* piRtL, int *iCarryL, int *iCarryR) {
+	int iEnteredLoop = false;
+
+	for (int i = iStart; i < iStop; i++) {
+		if (!iEnteredLoop) {
+			iEnteredLoop = true;
+		}
+		if (piLtR != NULL) {
+			piLtR[i] = getResultingDigit(i, piLhs, piRhs, iCarryL);
+		}
+
+		if (piRtL != NULL) {
+			piRtL[i] = getResultingDigit(i, piRhs, piLhs, iCarryR);
+		}
+	
+	}
+	return iEnteredLoop;
+}
+
+int CNumber::getResultingDigit(int iIndex, const int* piLhs, const int* piRhs, int* iCarry) {
+	int iResult = 0;
+
+	if (piRhs == NULL) {
+		iResult = (piLhs[iIndex] - *iCarry);
+	}
+	else {
+		iResult = (piLhs[iIndex] - *iCarry - piRhs[iIndex]);
+	}
+
+	if (iResult < 0) {
+		*iCarry = 1;
+		iResult = iDecimalSystemBase + iResult;
+	}
+	else {
+		*iCarry = 0;
+	}
+
+	return iResult;
 }
