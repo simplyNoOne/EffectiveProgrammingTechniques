@@ -5,7 +5,7 @@
 
 void vZ2start()
 {
-	/*
+	
 	CNumber c123;
 	c123 = 123;
 
@@ -15,10 +15,11 @@ void vZ2start()
 	CNumber c1024(1024);
 
 	CNumber res;
-	res = c99 - c123;
+	res = c99 + c123;
 	std::cout<<res.sToString()<<std::endl;
 
 	res = c1024 - c99;
+	res  += 1;
 	std::cout << res.sToString() << std::endl;
 
 	res = c99 - c1024;
@@ -36,12 +37,18 @@ void vZ2start()
 	res = res / c12;
 	std::cout << res.sToString() << std::endl;
 
-	*/
+	//res = c1024 / 1;
+	//std::cout << res.sToString() << std::endl;
 
+	
+	/*
 	CNumber c8 = 22;
 	CNumber nc3 = -10;
 	CNumber res;
 
+	res = 0;
+
+	//return;
 	res = c8 + nc3;
 	std::cout << res.sToString() << std::endl;
 
@@ -54,12 +61,14 @@ void vZ2start()
 	res = c8 * nc3;
 	std::cout << res.sToString() << std::endl;
 
-	CNumber c9 = 100;
+	CNumber c5 = -5;
 
-	res = c9/ nc3;
+	res = c5/ 2;
 	std::cout << res.sToString() << std::endl;
 
 	res = c8 / nc3;
 	std::cout << res.sToString() << std::endl;
+
+	*/
 
 }

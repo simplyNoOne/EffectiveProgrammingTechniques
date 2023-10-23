@@ -2,15 +2,18 @@
 #include <string>
 #include <iostream>
 
-const std::string defaultName = "none";
-const int defaultTabLen = 1;
+const std::string sDefaultName = "none";
+const int iDefaultTabLen = 1;
+const std::string sCopySuffix = "_copy";
+const std::string sDoubleSuffix = "_double";
 
 class CTable {
 public:
 	//
 	CTable();
+	CTable(bool setCustom);
 	CTable(std::string sName, int iTableLen);
-	CTable(CTable& pcOther);
+	CTable(const CTable& pcOther);
 	
 	//
 	~CTable();
@@ -19,6 +22,8 @@ public:
 	inline void vSetName(std::string sName) { this->sName = sName; }
 	bool bSetNewSize(int iTableLen);
 	CTable* pcClone();
+	std::string sToString();
+	void vDoubleSize(CTable **other);
 
 private:
 	std::string sName;

@@ -2,7 +2,7 @@
 #include <sstream>	//gotta get rid of this and create custom string, will be able to forward declare instead
 
 const int iDefualtNumberLength = 1;
-const int iSystemBase = 3;
+const int iSystemBase = 10;
 const int iDecimalBase = 10;
 
 
@@ -12,14 +12,18 @@ public:
 	CNumber();
 	CNumber(const int iValue);
 	CNumber(const CNumber& cValue);
-	inline ~CNumber() { delete piNumber; }
+	CNumber(CNumber&& cValue) noexcept;
+	inline ~CNumber() {
+		if(piNumber != NULL)
+		delete piNumber; 
+	}
 
 	
 	void operator=(const CNumber& cValue);
-	CNumber operator+(CNumber& cValue);
-	CNumber operator*(CNumber& cValue);
-	CNumber operator-(CNumber& cValue);
-	CNumber operator/(CNumber& cValue);
+	CNumber operator+(const CNumber& cValue);
+	CNumber operator*(const CNumber& cValue);
+	CNumber operator-(const CNumber& cValue);
+	CNumber operator/(const CNumber& cValue);
 
 	CNumber operator+=(int iValue);
 
@@ -30,6 +34,7 @@ public:
 	bool operator==(CNumber& cValue);
 
 	void operator=(const int iValue);
+	void operator=(CNumber&& cValue);
 	CNumber operator+(int iValue);
 	CNumber operator*(int iValue);
 	CNumber operator-(int iValue);
@@ -50,18 +55,13 @@ private:
 	CNumber(int* piNumber, int iLength);
 
 	/* Performs addition as if on two positive numbers*/
-	static CNumber* cUnsignedAddition(CNumber &cLValue, CNumber &cRValue);
+	static CNumber* cUnsignedAddition(const CNumber &cLValue, const CNumber &cRValue);
 	/* Performs subtraction as if on two positive numbers*/
-	static CNumber* cUnsignedSubtraction(CNumber& cLValue, CNumber& cRValue);
+	static CNumber* cUnsignedSubtraction(const CNumber& cLValue,const CNumber& cRValue);
 
-	/** Subtracts corresponding digits from 2 arrays; Returns true when loop was executed, false otherwise*/
-	static bool  bExecuteSubtractionLoop(int iStart, int iStop, const int* piLhs, const int* piRhs, int* piLtR, int* piRtL, int* iCarryL, int* iCarryR);
+	void vRemoveLeadingZeros();
 
-	static int iGetResultingDigit(int iIndex, const int* piLhs, const int* piRhs, int* iCarry);
-
-	static void vRemoveLeadingZeros(CNumber& cValue);
-
-	static int iToDecimal(int iValue);
+	void vFlipToComplement();
 
 
 };

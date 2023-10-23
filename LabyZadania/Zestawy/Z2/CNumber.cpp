@@ -1,11 +1,11 @@
 #include "CNumber.h"
 
 #include <cmath>
+#include <iostream>
 #include <algorithm>
 
 
-CNumber::CNumber()
-{
+CNumber::CNumber(){
 	iLength = iDefualtNumberLength;
 	piNumber = new int[iLength];
 	piNumber[0] = 0;
@@ -19,24 +19,36 @@ CNumber::CNumber(const int iValue) {
 	
 }
 
-CNumber::CNumber(const CNumber& cValue)
-{
+CNumber::CNumber(const CNumber& cValue){
 	piNumber = new int[iDefualtNumberLength];
 	*this = cValue;
+
+	std::cout << "COPY\n";
 }
 
-
-void CNumber::operator=(const int iValue)
+CNumber::CNumber(CNumber&& cValue) noexcept
 {
-	delete piNumber;
+	bPositive = cValue.bPositive;
+	iLength = cValue.iLength;
+	piNumber = cValue.piNumber;
+	cValue.piNumber = NULL;
+	std::cout << "MOVE\n";
+}
+
+CNumber::CNumber(int* piNumber, int iLength){
+	this->bPositive = true;
+	this->piNumber = piNumber;
+	this->iLength = iLength;
+}
+
+void CNumber::operator=(const int iValue){
+	delete piNumber;	//as the defualt constructor already dynamically allocates an array, gotta ensure there is no memory leak
+
 	bPositive = (iValue >= 0);
 	int iAbs = std::abs(iValue);
-	int iNumLen = 0;
-	while (iAbs > 0) {
+	int iNumLen = 1;
+	while (iAbs >= 10) {
 		iAbs /= iDecimalBase;
-		iNumLen++;
-	}
-	if (iNumLen == 0) {
 		iNumLen++;
 	}
 	iLength = iNumLen;
@@ -46,25 +58,9 @@ void CNumber::operator=(const int iValue)
 	for (int i = 0; i < iLength; i++) {
 		piNumber[i] = (iAbs / (int)std::pow(iDecimalBase, i)) % iDecimalBase;
 	}
-	/*
-	delete piNumber;
-	bPositive = (iValue >= 0);
-	int iAbs = std::abs(iValue);
-	int iDecimal = iToDecimal(iAbs);
-	int iNumLen = 1;
-	while(iDecimal >= std::pow(iSystemBase, iNumLen)){
-		iNumLen++;
-	}
-	iLength = iNumLen;
-	piNumber = new int[iLength];
-	for (int i = 0; i < iLength; i++) {
-		piNumber[i] = (iAbs / (int)std::pow(iDecimalBase, i)) % iDecimalBase;
-	}*/
-	//* this = cIntToNumber(iValue);
 }
 
-void CNumber::operator=(const CNumber& cValue)
-{
+void CNumber::operator=(const CNumber& cValue){
 	delete piNumber;
 	bPositive = cValue.bPositive;
 	iLength = cValue.iLength;
@@ -74,29 +70,29 @@ void CNumber::operator=(const CNumber& cValue)
 	}
 }
 
-CNumber CNumber::operator+(CNumber& cValue)
-{
+void CNumber::operator=(CNumber&& cValue) {
+	delete piNumber;
+	iLength = cValue.iLength;
+	bPositive = cValue.bPositive;
+	piNumber = cValue.piNumber;
+	cValue.piNumber = NULL;
+}
+
+CNumber CNumber::operator+(const CNumber& cValue){
 	CNumber* cResult;
-	if (bPositive && cValue.bPositive) {
+	if (this->bPositive + cValue.bPositive != 1) {
 		cResult = cUnsignedAddition(*this, cValue);
-	}
-	else if(!bPositive && !cValue.bPositive){
-		cResult = cUnsignedAddition(*this, cValue);
-		cResult->bPositive = false;
-	}
-	else if(!bPositive){
-		cResult = cUnsignedSubtraction(cValue, *this);
 	}
 	else {
 		cResult = cUnsignedSubtraction(*this, cValue);
 	}
-	CNumber cCopy = *cResult;
+	cResult->bPositive = this->bPositive;
+	CNumber cCopy = std::move(*cResult);
 	delete cResult;
 	return cCopy;
 }
 
-CNumber CNumber::operator*(CNumber& cValue)
-{
+CNumber CNumber::operator*(const CNumber& cValue){
 	int iMaxNumLen = iLength + cValue.iLength;
 	CNumber cResult;
 	cResult = 0;
@@ -121,15 +117,14 @@ CNumber CNumber::operator*(CNumber& cValue)
 		cResult = cResult + cRow;
 	}
 	
-	cResult.bPositive = ((bPositive && cValue.bPositive) || (!bPositive && !cValue.bPositive));
+	cResult.bPositive = (bPositive + cValue.bPositive != 1);
 
-	vRemoveLeadingZeros(cResult);
+	this->vRemoveLeadingZeros();
 
 	return cResult;
 }
 
-CNumber CNumber::operator-(CNumber& cValue)
-{
+CNumber CNumber::operator-(const CNumber& cValue){
 	CNumber* cResult;
 	if (bPositive && cValue.bPositive) {
 		cResult = cUnsignedSubtraction(*this, cValue);
@@ -145,60 +140,48 @@ CNumber CNumber::operator-(CNumber& cValue)
 	else {
 		cResult = cUnsignedAddition(*this, cValue);
 	}
-	CNumber cCopy = *cResult;
+	CNumber cCopy = std::move(*cResult);
 	delete cResult;
 	return cCopy;
 }
 
-CNumber CNumber::operator/(CNumber& cValue)
-{
+CNumber CNumber::operator/(const CNumber& cValue){
 	CNumber* cPartial = new CNumber();
 	CNumber cAbs = abs(*this);
-	CNumber* cResult = new CNumber();
+	CNumber cResult;
+	cResult = 0;
 	while (*cPartial <= cAbs) {
 		cPartial = cUnsignedAddition(*cPartial, cValue);
-		*cResult = *cResult + 1;
+		cResult = cResult + 1;
 	}
-	*cResult = *cResult - 1;
-	cResult->bPositive = ((bPositive && cValue.bPositive) || (!bPositive && !cValue.bPositive));
-	CNumber cReturn = *cResult;
-	delete cResult;
-	return cReturn;
+	cResult = cResult - 1;
+	cResult.bPositive = bPositive + cValue.bPositive != 1;
+	return cResult;
 }
 
-CNumber CNumber::operator+=(int iValue)
-{
-	return *this + iValue;
+CNumber CNumber::operator+=(int iValue){
+	*this = *this + iValue;
+	return *this;
 }
 
-CNumber CNumber::operator-()
-{
-	CNumber cResult = *this;
+CNumber CNumber::operator-(){
+	CNumber cResult = std::move(*this);
 	cResult.bPositive = !cResult.bPositive;
 	return cResult;
 }
 
-bool CNumber::operator<=(CNumber& cValue)
-{
-	
+bool CNumber::operator<=(CNumber& cValue){
 	return (*this < cValue) || (*this == cValue);
 }
 
-bool CNumber::operator<(CNumber& cValue)
-{
+bool CNumber::operator<(CNumber& cValue){
 	bool bResult = false;
-	if (!this->bPositive && cValue.bPositive) {
-		bResult = true;
-	}
-	else if (this->bPositive && !cValue.bPositive) {
-		bResult = false;
+	if (this->bPositive + cValue.bPositive == 1) {
+		bResult = !this->bPositive;
 	}
 	else {
-		if (this->iLength < cValue.iLength) {
-			bResult = true;
-		}
-		else if (this->iLength > cValue.iLength) {
-			bResult = false;
+		if (this->iLength != cValue.iLength) {
+			bResult = this->iLength < cValue.iLength;
 		}
 		else {
 			bool bDifferenceFound = false;
@@ -216,15 +199,14 @@ bool CNumber::operator<(CNumber& cValue)
 				}
 			}
 		}
-		if (!this->bPositive && !cValue.bPositive) {
+		if (!this->bPositive) {
 			bResult = !bResult;
 		}
 	}
 	return bResult;
 }
 
-bool CNumber::operator==(CNumber& cValue)
-{
+bool CNumber::operator==(CNumber& cValue){
 	bool bResult;
 	if (this->iLength != cValue.iLength) {
 		bResult = false;
@@ -253,45 +235,30 @@ bool CNumber::operator==(CNumber& cValue)
 	return bResult;
 }
 
-
-
-CNumber CNumber::operator+(int iValue)
-{
-	CNumber cConvertedValue;
-	cConvertedValue = iValue;
-	return *this + cConvertedValue;
+CNumber CNumber::operator+(int iValue){
+	return *this + CNumber(iValue);
 }
 
-CNumber CNumber::operator*(int iValue)
-{
-	CNumber cConvertedValue;
-	cConvertedValue = iValue;
-	return *this * cConvertedValue;
+CNumber CNumber::operator*(int iValue){
+	return *this * CNumber(iValue);
 }
 
-CNumber CNumber::operator-(int iValue)
-{
-	CNumber cConvertedValue;
-	cConvertedValue = iValue;
-	return *this - cConvertedValue;
+CNumber CNumber::operator-(int iValue){
+	
+	return *this - CNumber(iValue);
 }
 
-CNumber CNumber::operator/(int iValue)
-{
-	CNumber cConvertedValue;
-	cConvertedValue = iValue;
-	return *this / cConvertedValue;
+CNumber CNumber::operator/(int iValue){
+	return *this / CNumber(iValue);
 }
 
-CNumber CNumber::abs(CNumber& cValue)
-{
-	CNumber cReturn = cValue;
+CNumber CNumber::abs(CNumber& cValue){
+	CNumber cReturn = std::move(cValue);
 	cReturn.bPositive = true;
 	return cReturn;
 }
 
-std::string CNumber::sToString()
-{
+std::string CNumber::sToString(){
 	std::ostringstream ossResult;
 	if (!bPositive) {
 		ossResult << "- ";
@@ -302,116 +269,73 @@ std::string CNumber::sToString()
 	return ossResult.str();
 }
 
-CNumber::CNumber(int* piNumber, int iLength)
+
+CNumber* CNumber::cUnsignedAddition(const CNumber& cLValue,const CNumber& cRValue)
 {
-	this->bPositive = true;
-	this->piNumber = piNumber;
-	this->iLength = iLength;
-}
-
-CNumber* CNumber::cUnsignedAddition(CNumber& cLValue, CNumber& cRValue)
-{
-	int iLenToTraverse = std::min(cLValue.iLength, cRValue.iLength);
-	int iMinNumLen = std::max(cLValue.iLength, cRValue.iLength);
-
-	CNumber* cResult = new CNumber();
-	cResult->iLength = iMinNumLen;
-	delete cResult->piNumber;
-	cResult->piNumber = new int[iMinNumLen];
-
-	int iCarry = 0;
-	int iDigitResult = 0;
-	for (int i = 0; i < iLenToTraverse; i++) {
-		iDigitResult = (iCarry + cLValue.piNumber[i] + cRValue.piNumber[i]);
-		cResult->piNumber[i] = iDigitResult % iSystemBase;
-		iCarry = iDigitResult / iSystemBase;
-	}
-	int* piLongerNum = (cLValue.iLength > cRValue.iLength) ? cLValue.piNumber : cRValue.piNumber;
-
-	for (int i = iLenToTraverse; i < iMinNumLen; i++) {
-		iDigitResult = iCarry + piLongerNum[i];
-		cResult->piNumber[i] = iDigitResult % iSystemBase;
-		iCarry = iDigitResult / iSystemBase;
-	}
-
-	if (iCarry != 0) {
-		int* piTemp = cResult->piNumber;
-		cResult->piNumber = new int[++cResult->iLength];
-		for (int i = 0; i < iMinNumLen; i++) {
-			cResult->piNumber[i] = piTemp[i];
-		}
-		cResult->piNumber[iMinNumLen] = iCarry;
-		delete piTemp;
-	}
-
-	return cResult;
-}
-
-CNumber* CNumber::cUnsignedSubtraction(CNumber& cLValue, CNumber& cRValue)
-{
-	int iLenToTraverse = std::min(cLValue.iLength, cRValue.iLength);
-	int iMaxNumLen = std::max(cLValue.iLength, cRValue.iLength);
-
-	int* piLhsSubRhs = new int[iMaxNumLen];
-	int* piRhsSubLhs = new int[iMaxNumLen];
-	int iCarryL = 0;
-	int iCarryR = 0;
-
-	bExecuteSubtractionLoop(0, iLenToTraverse, cLValue.piNumber, cRValue.piNumber, piLhsSubRhs, piRhsSubLhs, &iCarryL, &iCarryR);
+	int iMaxNumLen = std::max(cLValue.iLength, cRValue.iLength) + 1;
 
 	CNumber* cResult = new CNumber();
 	cResult->iLength = iMaxNumLen;
 	delete cResult->piNumber;
-	cResult->piNumber = (iCarryL == 0) ? piLhsSubRhs : piRhsSubLhs;
+	cResult->piNumber = new int[iMaxNumLen];
 
-
-	if (bExecuteSubtractionLoop(iLenToTraverse, cRValue.iLength, NULL, cRValue.piNumber, NULL, piRhsSubLhs, NULL, &iCarryR)) {
-		cResult->piNumber = piRhsSubLhs;
+	int iCarry = 0;
+	int iDigitResult = 0;
+	int iLNum, iRNum = 0;
+	for (int i = 0; i < iMaxNumLen; i++) {
+		iLNum  = cLValue.iLength <= i ? 0 : cLValue.piNumber[i];
+		iRNum = cRValue.iLength <= i ? 0 : cRValue.piNumber[i];
+		iDigitResult = (iCarry + iLNum + iRNum);
+		cResult->piNumber[i] = iDigitResult % iSystemBase;
+		iCarry = iDigitResult / iSystemBase;
 	}
-
-	if (bExecuteSubtractionLoop(iLenToTraverse, cLValue.iLength, cLValue.piNumber, NULL, piLhsSubRhs, NULL, &iCarryL, NULL)) {
-		cResult->piNumber = piLhsSubRhs;
-	}
-
-	if (cResult->piNumber == piRhsSubLhs) {
-		delete piLhsSubRhs;
-		cResult->bPositive = false;
-	}
-	else {
-		delete piRhsSubLhs;
-	}
-
-	vRemoveLeadingZeros(*cResult);
+	
+	cResult->vRemoveLeadingZeros();
 
 	return cResult;
 }
 
-bool CNumber::bExecuteSubtractionLoop(int iStart, int iStop, const int* piLhs, const int* piRhs, int* piLtR, int* piRtL, int *iCarryL, int *iCarryR) {
-	int iEnteredLoop = false;
 
-	for (int i = iStart; i < iStop; i++) {
-		if (!iEnteredLoop) {
-			iEnteredLoop = true;
-		}
-		if (piLtR != NULL) {
-			piLtR[i] = iGetResultingDigit(i, piLhs, piRhs, iCarryL);
-		}
 
-		if (piRtL != NULL) {
-			piRtL[i] = iGetResultingDigit(i, piRhs, piLhs, iCarryR);
+CNumber* CNumber::cUnsignedSubtraction(const CNumber& cLValue, const CNumber& cRValue)
+{
+	int iMaxNumLen = std::max(cLValue.iLength, cRValue.iLength);
+	int* piSub= new int[iMaxNumLen];
+
+	int iBorrow = 0;
+	int iDigitResult = 0;
+	int iLNum, iRNum = 0;
+	for (int i = 0; i < iMaxNumLen; i++) {
+		iLNum = cLValue.iLength <= i ? 0 : cLValue.piNumber[i];
+		iRNum = cRValue.iLength <= i ? 0 : cRValue.piNumber[i];
+		iDigitResult = (iLNum -iBorrow - iRNum);
+		if (iDigitResult < 0) {
+			iDigitResult = iDigitResult + iSystemBase;
+			iBorrow = 1;
 		}
-	
+		else {
+			iBorrow = 0;
+		}
+		piSub[i] = iDigitResult;
 	}
-	return iEnteredLoop;
+
+	CNumber* cResult = new CNumber(piSub, iMaxNumLen);
+
+	if (iBorrow != 0) {
+		cResult->bPositive = false;
+		cResult->vFlipToComplement();
+	}
+
+	cResult->vRemoveLeadingZeros();
+	return cResult;
 }
 
- void CNumber::vRemoveLeadingZeros(CNumber& cValue)
-{
+ void CNumber::vRemoveLeadingZeros(){
 
 	bool bNonZero = false;
 	int iZeroCounter = 0;
-	while (!bNonZero && iZeroCounter < cValue.iLength - 1) {
-		if (cValue.piNumber[cValue.iLength - iZeroCounter - 1] != 0) {
+	while (!bNonZero && iZeroCounter < this->iLength - 1) {
+		if (this->piNumber[this->iLength - iZeroCounter - 1] != 0) {
 			bNonZero = true;
 		}
 		else {
@@ -419,50 +343,21 @@ bool CNumber::bExecuteSubtractionLoop(int iStart, int iStop, const int* piLhs, c
 		}
 	}
 	if (iZeroCounter > 0) {
-		int* piWithoutZeros = new int[cValue.iLength - iZeroCounter];
-		std::copy(cValue.piNumber, cValue.piNumber + (cValue.iLength - iZeroCounter), piWithoutZeros);
-		delete cValue.piNumber;
-		cValue.piNumber = piWithoutZeros;
-		cValue.iLength -= iZeroCounter;
+		int* piWithoutZeros = new int[this->iLength - iZeroCounter];
+		std::copy(this->piNumber, this->piNumber + (this->iLength - iZeroCounter), piWithoutZeros);
+		delete this->piNumber;
+		this->piNumber = piWithoutZeros;
+		this->iLength -= iZeroCounter;
 	}
-
 }
 
- int CNumber::iToDecimal(int iValue)
- {
-	int iTemp = iValue;
-	int iResult = 0;
-	int base = 1;  
-
-	while (iTemp > 0) {
-		int lastDigit = iTemp % 10;  
-		iResult += lastDigit * base;  
-		iTemp /= 10;  
-		base *= iSystemBase;  
-	}
-
-	return iResult;
-	 
+ void CNumber::vFlipToComplement() {
+	 int* piComplement = new int[this->iLength];
+	 for (int i = 0; i < this->iLength; i++) {
+		 piComplement[i] = iSystemBase - 1 - this->piNumber[i];
+	 }
+	 piComplement[0]++;
+	 delete this->piNumber;
+	 this->piNumber = piComplement;
  }
 
-
-int CNumber::iGetResultingDigit(int iIndex, const int* piLhs, const int* piRhs, int* iCarry) {
-	int iResult = 0;
-
-	if (piRhs == NULL) {
-		iResult = (piLhs[iIndex] - *iCarry);
-	}
-	else {
-		iResult = (piLhs[iIndex] - *iCarry - piRhs[iIndex]);
-	}
-
-	if (iResult < 0) {
-		*iCarry = 1;
-		iResult = iSystemBase + iResult;
-	}
-	else {
-		*iCarry = 0;
-	}
-
-	return iResult;
-}
