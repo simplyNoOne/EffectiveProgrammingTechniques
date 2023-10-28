@@ -9,41 +9,66 @@ const int iDecimalBase = 10;
 class CNumber
 {
 public:
+	friend std::ostream& operator<<(std::ostream& os, const CNumber& cValue);
+	friend std::istream& operator>>(std::istream& is, const CNumber& cValue);
+	//so that the order is interchangable
+	inline friend CNumber operator+(int iValue, const CNumber& cValue) { return cValue + iValue; }
+	inline friend CNumber operator-(int iValue, const CNumber& cValue) { return cValue - iValue; }
+	inline friend CNumber operator*(int iValue, const CNumber& cValue) { return cValue * iValue; }
+	inline friend CNumber operator/(int iValue, const CNumber& cValue) { return cValue / iValue; }
+
+public:
 	CNumber();
 	CNumber(const int iValue);
 	CNumber(const CNumber& cValue);
-	CNumber(CNumber&& cValue) noexcept;
-	inline ~CNumber() {
-		if(piNumber != NULL)
-		delete piNumber; 
-	}
-
-	
-	void operator=(const CNumber& cValue);
-	CNumber operator+(const CNumber& cValue);
-	CNumber operator*(const CNumber& cValue);
-	CNumber operator-(const CNumber& cValue);
-	CNumber operator/(const CNumber& cValue);
-
-	CNumber operator+=(int iValue);
+	CNumber(const std::string& sValue);
+	//CNumber(CNumber&& cValue) noexcept;
+	inline ~CNumber() { if(piNumber != NULL) delete piNumber; }
 
 	CNumber operator-();
 
-	bool operator<=(CNumber& cValue);
-	bool operator<(CNumber& cValue);
-	bool operator==(CNumber& cValue);
+	//CNumber and CNumber
+	//void operator=(CNumber&& cValue);
+	void operator=(const CNumber& cValue);
+	CNumber operator+(const CNumber& cValue)const;
+	CNumber operator-(const CNumber& cValue)const;
+	CNumber operator*(const CNumber& cValue)const;
+	CNumber operator/(const CNumber& cValue)const;
 
+	CNumber operator+=(const CNumber& cValue);
+	CNumber operator-=(const CNumber& cValue);
+	CNumber operator*=(const CNumber& cValue);
+	CNumber operator/=(const CNumber& cValue);
+
+	bool operator==(const CNumber& cValue)const;
+	bool operator<=(const CNumber& cValue)const;
+	bool operator<(const CNumber& cValue)const;
+	bool operator>=(const CNumber& cValue)const;
+	bool operator>(const CNumber& cValue)const;
+
+	//CNumber and int
+
+	void operator=(const std::string& sValue);
 	void operator=(const int iValue);
-	void operator=(CNumber&& cValue);
-	CNumber operator+(int iValue);
-	CNumber operator*(int iValue);
-	CNumber operator-(int iValue);
-	CNumber operator/(int iValue);
+	inline CNumber operator+(int iValue) const { return *this + CNumber(iValue); }
+	inline CNumber operator-(int iValue) const { return *this - CNumber(iValue); }
+	inline CNumber operator*(int iValue) const { return *this * CNumber(iValue); }
+	inline CNumber operator/(int iValue) const { return *this / CNumber(iValue); }
 
+	inline CNumber operator+=(int iValue) { return *this += CNumber(iValue); }
+	inline CNumber operator-=(int iValue) { return *this -= CNumber(iValue); }
+	inline CNumber operator*=(int iValue) { return *this *= CNumber(iValue); }
+	inline CNumber operator/=(int iValue) { return *this /= CNumber(iValue); }
 
-	static CNumber abs(CNumber& cValue);
+	inline bool operator==(int iValue)const { return *this == CNumber(iValue); }
+	inline bool operator<=(int iValue)const { return *this <= CNumber(iValue); }
+	inline bool operator<(int iValue)const { return *this < CNumber(iValue); }
+	inline bool operator>=(int iValue)const { return *this >= CNumber(iValue); }
+	inline bool operator>(int iValue)const { return *this > CNumber(iValue); }
 
-	std::string sToString();
+	
+	std::string sToString() const;
+	static CNumber abs(const CNumber& cValue);
 
 private:
 	int* piNumber;
@@ -59,9 +84,11 @@ private:
 	/* Performs subtraction as if on two positive numbers*/
 	static CNumber* cUnsignedSubtraction(const CNumber& cLValue,const CNumber& cRValue);
 
-	void vRemoveLeadingZeros();
-
 	void vFlipToComplement();
+	void vRemoveLeadingZeros();
+	int iGetResultingDivDigit( CNumber &cDiv);
+
+	
 
 
 };

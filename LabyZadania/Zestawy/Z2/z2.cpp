@@ -7,10 +7,10 @@ void vZ2start()
 {
 	
 	CNumber c123;
-	c123 = 123;
+	c123 = 33333123;
 
 	CNumber c99;
-	c99 = 99;
+	c99 = 9333339;
 
 	CNumber c1024(1024);
 
@@ -36,6 +36,35 @@ void vZ2start()
 
 	res = res / c12;
 	std::cout << res.sToString() << std::endl;
+
+	CNumber cBigDividend (195950421);
+	std::cout << (cBigDividend / 1).sToString() << std::endl;
+	std::cout << (cBigDividend / 8975).sToString() << std::endl;
+	std::cout << (cBigDividend / 643).sToString() << std::endl;
+	std::cout << (cBigDividend / 21).sToString() << std::endl;
+	std::cout << (cBigDividend / 12034).sToString() << std::endl;
+	std::cout << (cBigDividend / 991).sToString() << std::endl;
+	std::cout << (cBigDividend / 3592).sToString() << std::endl;
+	std::cout << (cBigDividend / -5253).sToString() << std::endl;
+	std::cout << (cBigDividend / -7819).sToString() << std::endl;
+	std::cout << (cBigDividend / -38) << std::endl;
+	std::cout << (cBigDividend / -9) << std::endl;
+
+
+	//BUT HOW ABOUT NUMBERS GREATER THAN INT?
+	//HOW TO GET 972361962_41564218_897421???
+	// Answer: EASY:
+	//take 41564218, multiply by 10^6
+	//add 897421
+	//multiply 10^8 by 10^6 to get 10^14
+	//take 972361962, multiply by 10^14
+	//add the previous result
+
+	CNumber biggie(((CNumber(41564218) * std::pow(10, 6)) + CNumber(897421)) + (CNumber(972361962) * CNumber(std::pow(10, 8)) * std::pow(10, 6)));
+	//see, it works
+	std::cout << biggie<< std::endl;
+
+	std::cout << 7 + biggie << std::endl;
 
 	//res = c1024 / 1;
 	//std::cout << res.sToString() << std::endl;

@@ -1,8 +1,7 @@
 #include "CNumber.h"
 
 #include <cmath>
-#include <iostream>
-#include <algorithm>
+//#include <algorithm>
 
 
 CNumber::CNumber(){
@@ -23,9 +22,14 @@ CNumber::CNumber(const CNumber& cValue){
 	piNumber = new int[iDefualtNumberLength];
 	*this = cValue;
 
-	std::cout << "COPY\n";
+	//std::cout << "COPY\n";
 }
-
+CNumber::CNumber(const std::string& sValue)
+{
+	piNumber = new int[iDefualtNumberLength];
+	*this = sValue;
+}
+/*
 CNumber::CNumber(CNumber&& cValue) noexcept
 {
 	bPositive = cValue.bPositive;
@@ -34,11 +38,16 @@ CNumber::CNumber(CNumber&& cValue) noexcept
 	cValue.piNumber = NULL;
 	std::cout << "MOVE\n";
 }
-
+*/
 CNumber::CNumber(int* piNumber, int iLength){
 	this->bPositive = true;
 	this->piNumber = piNumber;
 	this->iLength = iLength;
+}
+
+//wip
+void CNumber::operator=(const std::string& sValue)
+{
 }
 
 void CNumber::operator=(const int iValue){
@@ -69,16 +78,16 @@ void CNumber::operator=(const CNumber& cValue){
 		piNumber[i] = cValue.piNumber[i];
 	}
 }
-
+/*
 void CNumber::operator=(CNumber&& cValue) {
 	delete piNumber;
 	iLength = cValue.iLength;
 	bPositive = cValue.bPositive;
 	piNumber = cValue.piNumber;
 	cValue.piNumber = NULL;
-}
+}*/
 
-CNumber CNumber::operator+(const CNumber& cValue){
+CNumber CNumber::operator+(const CNumber& cValue)const{
 	CNumber* cResult;
 	if (this->bPositive + cValue.bPositive != 1) {
 		cResult = cUnsignedAddition(*this, cValue);
@@ -87,12 +96,13 @@ CNumber CNumber::operator+(const CNumber& cValue){
 		cResult = cUnsignedSubtraction(*this, cValue);
 	}
 	cResult->bPositive = this->bPositive;
-	CNumber cCopy = std::move(*cResult);
+	//CNumber cCopy = std::move(*cResult);
+	CNumber cCopy = *cResult;
 	delete cResult;
 	return cCopy;
 }
 
-CNumber CNumber::operator*(const CNumber& cValue){
+CNumber CNumber::operator*(const CNumber& cValue)const{
 	int iMaxNumLen = iLength + cValue.iLength;
 	CNumber cResult;
 	cResult = 0;
@@ -119,12 +129,12 @@ CNumber CNumber::operator*(const CNumber& cValue){
 	
 	cResult.bPositive = (bPositive + cValue.bPositive != 1);
 
-	this->vRemoveLeadingZeros();
+	cResult.vRemoveLeadingZeros();
 
 	return cResult;
 }
 
-CNumber CNumber::operator-(const CNumber& cValue){
+CNumber CNumber::operator-(const CNumber& cValue)const{
 	CNumber* cResult;
 	if (bPositive && cValue.bPositive) {
 		cResult = cUnsignedSubtraction(*this, cValue);
@@ -140,11 +150,12 @@ CNumber CNumber::operator-(const CNumber& cValue){
 	else {
 		cResult = cUnsignedAddition(*this, cValue);
 	}
-	CNumber cCopy = std::move(*cResult);
+	CNumber cCopy = *cResult;
+	//CNumber cCopy = std::move(*cResult);
 	delete cResult;
 	return cCopy;
 }
-
+/*
 CNumber CNumber::operator/(const CNumber& cValue){
 	CNumber* cPartial = new CNumber();
 	CNumber cAbs = abs(*this);
@@ -157,24 +168,75 @@ CNumber CNumber::operator/(const CNumber& cValue){
 	cResult = cResult - 1;
 	cResult.bPositive = bPositive + cValue.bPositive != 1;
 	return cResult;
+}*/
+
+CNumber CNumber::operator/(const CNumber& cValue) const{
+	CNumber cDividend = abs(*this);
+	CNumber cDiv = abs(cValue);
+	if (cDividend < cDiv) {
+		return CNumber();
+	}
+	int iLenDiff = this->iLength - cValue.iLength;
+	int* piResult = new int[iLenDiff + 1];
+	std::fill(piResult, piResult + iLenDiff + 1, 0);
+	CNumber cCurrentDiv;
+	bool bKeepDividing = true;
+	while (bKeepDividing && iLenDiff >= 0) {
+		if (cDividend < cDiv * std::pow(iSystemBase, iLenDiff)) {
+			if (iLenDiff == 0) {
+				bKeepDividing = false;
+			}
+			iLenDiff--;
+		}
+		if (bKeepDividing) {
+			cCurrentDiv = cDiv * std::pow(iSystemBase, iLenDiff);
+			piResult[iLenDiff] = cDividend.iGetResultingDivDigit(cCurrentDiv);
+			cDividend -= cCurrentDiv * piResult[iLenDiff];
+		}
+	}
+	CNumber cResult(piResult, this->iLength - cValue.iLength + 1);
+	cResult.vRemoveLeadingZeros();
+	cResult.bPositive = bPositive + cValue.bPositive != 1;
+	return cResult;
 }
 
-CNumber CNumber::operator+=(int iValue){
-	*this = *this + iValue;
+
+CNumber CNumber::operator+=(const CNumber& cValue)
+{
+	*this = *this + cValue;
+	return *this;
+}
+
+CNumber CNumber::operator-=(const CNumber& cValue)
+{
+	*this = *this - cValue;
+	return *this;
+}
+
+CNumber CNumber::operator*=(const CNumber& cValue)
+{
+	*this = *this * cValue;
+	return *this;
+}
+
+CNumber CNumber::operator/=(const CNumber& cValue)
+{
+	*this = *this / cValue;
 	return *this;
 }
 
 CNumber CNumber::operator-(){
-	CNumber cResult = std::move(*this);
+	//CNumber cResult = std::move(*this);
+	CNumber cResult = *this;
 	cResult.bPositive = !cResult.bPositive;
 	return cResult;
 }
 
-bool CNumber::operator<=(CNumber& cValue){
+bool CNumber::operator<=(const CNumber& cValue)const{
 	return (*this < cValue) || (*this == cValue);
 }
 
-bool CNumber::operator<(CNumber& cValue){
+bool CNumber::operator<(const CNumber& cValue)const{
 	bool bResult = false;
 	if (this->bPositive + cValue.bPositive == 1) {
 		bResult = !this->bPositive;
@@ -206,7 +268,17 @@ bool CNumber::operator<(CNumber& cValue){
 	return bResult;
 }
 
-bool CNumber::operator==(CNumber& cValue){
+bool CNumber::operator>=(const CNumber& cValue) const
+{
+	return cValue <= *this;
+}
+
+bool CNumber::operator>(const CNumber& cValue) const
+{
+	return cValue < *this;
+}
+
+bool CNumber::operator==(const CNumber& cValue)const{
 	bool bResult;
 	if (this->iLength != cValue.iLength) {
 		bResult = false;
@@ -235,30 +307,15 @@ bool CNumber::operator==(CNumber& cValue){
 	return bResult;
 }
 
-CNumber CNumber::operator+(int iValue){
-	return *this + CNumber(iValue);
-}
 
-CNumber CNumber::operator*(int iValue){
-	return *this * CNumber(iValue);
-}
-
-CNumber CNumber::operator-(int iValue){
-	
-	return *this - CNumber(iValue);
-}
-
-CNumber CNumber::operator/(int iValue){
-	return *this / CNumber(iValue);
-}
-
-CNumber CNumber::abs(CNumber& cValue){
-	CNumber cReturn = std::move(cValue);
+CNumber CNumber::abs(const CNumber& cValue){
+	//CNumber cReturn = std::move(cValue);
+	CNumber cReturn = cValue;
 	cReturn.bPositive = true;
 	return cReturn;
 }
 
-std::string CNumber::sToString(){
+std::string CNumber::sToString() const{
 	std::ostringstream ossResult;
 	if (!bPositive) {
 		ossResult << "- ";
@@ -351,6 +408,22 @@ CNumber* CNumber::cUnsignedSubtraction(const CNumber& cLValue, const CNumber& cR
 	}
 }
 
+ int CNumber::iGetResultingDivDigit( CNumber& cDiv)
+ {
+	 int i = 1;
+	 bool found = false;
+	 while (!found) {
+		 if (*this < cDiv * i) {
+			 found = true;
+			 i--;
+		 }
+		 else {
+			 i++;
+		 }
+	 }
+	 return i;
+ }
+
  void CNumber::vFlipToComplement() {
 	 int* piComplement = new int[this->iLength];
 	 for (int i = 0; i < this->iLength; i++) {
@@ -361,3 +434,17 @@ CNumber* CNumber::cUnsignedSubtraction(const CNumber& cLValue, const CNumber& cR
 	 this->piNumber = piComplement;
  }
 
+ std::ostream& operator<<(std::ostream& os, const CNumber& cValue)
+ {
+	 os << cValue.sToString();
+	 return os;
+ }
+
+ //wip
+ std::istream& operator>>(std::istream& is, const CNumber& cValue)
+ {
+	 std::string s;
+	 std::getline(is, s);
+//	 std::to_int
+	 return is;
+ }
