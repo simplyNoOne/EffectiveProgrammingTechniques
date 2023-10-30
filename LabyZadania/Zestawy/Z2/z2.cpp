@@ -5,17 +5,23 @@
 
 void vZ2start()
 {
+	CNumber::vSetSystemBase(12);
+
+	CNumber test(187379090);
+	//test / 12;
+	std::cout << test << std::endl;
+
 	
 	CNumber c123;
-	c123 = 33333123;
+	c123 = 123;
 
 	CNumber c99;
-	c99 = 9333339;
+	c99 = 99;
 
 	CNumber c1024(1024);
 
 	CNumber res;
-	res = c99 + c123;
+	res = c99 * c123;		//12177
 	std::cout<<res.sToString()<<std::endl;
 
 	res = c1024 - c99;
@@ -34,10 +40,14 @@ void vZ2start()
 
 	c12 = -c12;
 
+	c12 = "0 0 1";
+	std::cout << c12 << std::endl;
+
 	res = res / c12;
 	std::cout << res.sToString() << std::endl;
 
-	CNumber cBigDividend (195950421);
+	/*CNumber cBigDividend(195950421);
+	//CNumber cBigDividend (19921);
 	std::cout << (cBigDividend / 1).sToString() << std::endl;
 	std::cout << (cBigDividend / 8975).sToString() << std::endl;
 	std::cout << (cBigDividend / 643).sToString() << std::endl;
@@ -50,7 +60,7 @@ void vZ2start()
 	std::cout << (cBigDividend / -38) << std::endl;
 	std::cout << (cBigDividend / -9) << std::endl;
 
-
+	*/
 	//BUT HOW ABOUT NUMBERS GREATER THAN INT?
 	//HOW TO GET 972361962_41564218_897421???
 	// Answer: EASY:

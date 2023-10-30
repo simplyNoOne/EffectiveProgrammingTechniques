@@ -1,8 +1,9 @@
 #pragma once
 #include <sstream>	//gotta get rid of this and create custom string, will be able to forward declare instead
-
+#include <vector>
+#include <string>
 const int iDefualtNumberLength = 1;
-const int iSystemBase = 10;
+static int iSystemBase = 13;
 const int iDecimalBase = 10;
 
 
@@ -10,8 +11,8 @@ class CNumber
 {
 public:
 	friend std::ostream& operator<<(std::ostream& os, const CNumber& cValue);
-	friend std::istream& operator>>(std::istream& is, const CNumber& cValue);
 	//so that the order is interchangable
+	//int and CNumber
 	inline friend CNumber operator+(int iValue, const CNumber& cValue) { return cValue + iValue; }
 	inline friend CNumber operator-(int iValue, const CNumber& cValue) { return cValue - iValue; }
 	inline friend CNumber operator*(int iValue, const CNumber& cValue) { return cValue * iValue; }
@@ -69,11 +70,14 @@ public:
 	
 	std::string sToString() const;
 	static CNumber abs(const CNumber& cValue);
+	static void vSetSystemBase(int iBase);
 
 private:
 	int* piNumber;
 	int iLength;
 	bool bPositive;
+	static std::vector<std::string> vDict;
+	
 
 private:
 
@@ -87,6 +91,12 @@ private:
 	void vFlipToComplement();
 	void vRemoveLeadingZeros();
 	int iGetResultingDivDigit( CNumber &cDiv);
+	static void vInitDictionary();
+
+	int iGetLenFromDecimal(int iValue);
+	void vFromStringNoSeparator(std::string sValue);
+	void vFromStringWithSeparator(std::string sValue);
+
 
 	
 
