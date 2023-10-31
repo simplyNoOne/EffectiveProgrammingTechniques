@@ -5,7 +5,7 @@
 
 void vZ2start()
 {
-	CNumber::vSetSystemBase(12);
+	//CNumber::vSetSystemBase(12);
 
 	CNumber test(187379090);
 	//test / 12;
@@ -40,7 +40,7 @@ void vZ2start()
 
 	c12 = -c12;
 
-	c12 = "0 0 1";
+	c12 = "001";
 	std::cout << c12 << std::endl;
 
 	res = res / c12;

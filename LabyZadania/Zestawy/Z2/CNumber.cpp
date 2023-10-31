@@ -1,8 +1,14 @@
 #include "CNumber.h"
 
 #include <cmath>
-#include <iostream>
 
+std::vector<std::string>* CNumber::vDict = NULL;
+
+//public section
+std::ostream& operator<<(std::ostream& os, const CNumber& cValue) {
+	os << cValue.sToString();
+	return os;
+}
 
 CNumber::CNumber(){
 	iLength = iDefualtNumberLength;
@@ -16,14 +22,16 @@ CNumber::CNumber(const int iValue) {
 	*this = iValue;
 }
 
+CNumber::CNumber(const std::string& sValue) {
+	piNumber = new int[iDefualtNumberLength];
+	*this = sValue;
+}
+
 CNumber::CNumber(const CNumber& cValue){
 	piNumber = new int[iDefualtNumberLength];
 	*this = cValue;
 }
-CNumber::CNumber(const std::string& sValue){
-	piNumber = new int[iDefualtNumberLength];
-	*this = sValue;
-}
+
 /*
 CNumber::CNumber(CNumber&& cValue) noexcept
 {
@@ -34,24 +42,6 @@ CNumber::CNumber(CNumber&& cValue) noexcept
 	std::cout << "MOVE\n";
 }
 */
-CNumber::CNumber(int* piNumber, int iLength){
-	this->bPositive = true;
-	this->piNumber = piNumber;
-	this->iLength = iLength;
-}
-
-//wip
-void CNumber::operator=(const std::string& sValue){
-	delete this->piNumber;
-	
-	if (iSystemBase <= iDecimalBase) {
-		vFromStringNoSeparator(sValue);
-	}
-	else {
-		vFromStringWithSeparator(sValue);
-	}
-	vRemoveLeadingZeros();
-}
 
 void CNumber::operator=(const int iValue) {
 	delete piNumber;
@@ -66,6 +56,18 @@ void CNumber::operator=(const int iValue) {
 		iToConvert /= iSystemBase;
 		iIndex++;
 	}
+}
+
+void CNumber::operator=(const std::string& sValue) {
+	delete this->piNumber;
+
+	if (iSystemBase <= iDecimalBase) {
+		vNumFromStringNoSeparator(sValue);
+	}
+	else {
+		vNumFromStringWithSeparator(sValue);
+	}
+	vRemoveLeadingZeros();
 }
 
 void CNumber::operator=(const CNumber& cValue){
@@ -86,15 +88,25 @@ void CNumber::operator=(CNumber&& cValue) {
 	cValue.piNumber = NULL;
 }*/
 
+CNumber CNumber::operator-() const {
+	//CNumber cResult = std::move(*this);
+	CNumber cResult = *this;
+	cResult.bPositive = !cResult.bPositive;
+	return cResult;
+}
+
 CNumber CNumber::operator+(const CNumber& cValue)const{
 	CNumber* cResult;
 	if (this->bPositive + cValue.bPositive != 1) {
 		cResult = cUnsignedAddition(*this, cValue);
+		cResult->bPositive = this->bPositive;
 	}
 	else {
 		cResult = cUnsignedSubtraction(*this, cValue);
+		if (!this->bPositive) {
+			cResult->bPositive = !cResult->bPositive;
+		}
 	}
-	cResult->bPositive = this->bPositive;
 	//CNumber cCopy = std::move(*cResult);
 	CNumber cCopy = *cResult;
 	delete cResult;
@@ -126,30 +138,7 @@ CNumber CNumber::operator*(const CNumber& cValue)const{
 	
 	cResult.bPositive = (bPositive + cValue.bPositive != 1);
 	cResult.vRemoveLeadingZeros();
-
 	return cResult;
-}
-
-CNumber CNumber::operator-(const CNumber& cValue)const{
-	CNumber* cResult;
-	if (bPositive && cValue.bPositive) {
-		cResult = cUnsignedSubtraction(*this, cValue);
-	}
-	else if (!bPositive && !cValue.bPositive) {
-		cResult = cUnsignedSubtraction(*this, cValue);
-		cResult->bPositive = false;
-	}
-	else if (!bPositive) {
-		cResult = cUnsignedAddition(*this, cValue);
-		cResult->bPositive = false;
-	}
-	else {
-		cResult = cUnsignedAddition(*this, cValue);
-	}
-	CNumber cCopy = *cResult;
-	//CNumber cCopy = std::move(*cResult);
-	delete cResult;
-	return cCopy;
 }
 
 CNumber CNumber::operator/(const CNumber& cValue) const{
@@ -182,7 +171,6 @@ CNumber CNumber::operator/(const CNumber& cValue) const{
 	return cResult;
 }
 
-
 CNumber CNumber::operator+=(const CNumber& cValue){
 	*this = *this + cValue;
 	return *this;
@@ -203,15 +191,26 @@ CNumber CNumber::operator/=(const CNumber& cValue){
 	return *this;
 }
 
-CNumber CNumber::operator-(){
-	//CNumber cResult = std::move(*this);
-	CNumber cResult = *this;
-	cResult.bPositive = !cResult.bPositive;
-	return cResult;
-}
-
-bool CNumber::operator<=(const CNumber& cValue)const{
-	return (*this < cValue) || (*this == cValue);
+bool CNumber::operator==(const CNumber& cValue)const {
+	if (this->iLength != cValue.iLength) {
+		return false;
+	}
+	else if (this->bPositive + cValue.bPositive == 1) {
+		return false;
+	}
+	else {
+		int it = 1;
+		int iLhs, iRhs;
+		while (it <= this->iLength) {
+			iLhs = this->piNumber[this->iLength - it];
+			iRhs = cValue.piNumber[cValue.iLength - it];
+			if (iLhs != iRhs) {
+				return false;
+			}
+			it++;
+		}
+		return true;
+	}
 }
 
 bool CNumber::operator<(const CNumber& cValue)const{
@@ -246,44 +245,7 @@ bool CNumber::operator<(const CNumber& cValue)const{
 	return bResult;
 }
 
-bool CNumber::operator>=(const CNumber& cValue) const{
-	return cValue <= *this;
-}
-
-bool CNumber::operator>(const CNumber& cValue) const{
-	return cValue < *this;
-}
-
-bool CNumber::operator==(const CNumber& cValue)const{
-	if (this->iLength != cValue.iLength) {
-		return false;
-	}else if(this->bPositive + cValue.bPositive == 1){
-		return false;
-	}
-	else {
-		int it = 1;
-		int iLhs, iRhs;
-		while (it <= this->iLength) {
-			iLhs = this->piNumber[this->iLength - it];
-			iRhs = cValue.piNumber[cValue.iLength - it];
-			if (iLhs != iRhs) {
-				return false;
-			}
-			it++;
-		}
-		return true;
-	}
-}
-
-
-CNumber CNumber::abs(const CNumber& cValue){
-	//CNumber cReturn = std::move(cValue);
-	CNumber cReturn = cValue;
-	cReturn.bPositive = true;
-	return cReturn;
-}
-
-std::string CNumber::sToString() const{
+std::string CNumber::sToString() const {
 	std::ostringstream ossResult;
 	if (!bPositive) {
 		ossResult << "- ";
@@ -295,12 +257,46 @@ std::string CNumber::sToString() const{
 	}
 	else {
 		for (int i = iLength - 1; i >= 0; i--) {
-			ossResult << vDict.at(piNumber[i]);
+			ossResult << vDict->at(piNumber[i]);
 		}
 	}
 	return ossResult.str();
 }
 
+CNumber CNumber::abs(const CNumber& cValue){
+	//CNumber cReturn = std::move(cValue);
+	CNumber cReturn = cValue;
+	cReturn.bPositive = true;
+	return cReturn;
+}
+
+void CNumber::vSetSystemBase(int iBase) {
+	if (vDict != NULL) {
+		delete vDict;
+		vDict = NULL;
+	}
+	iSystemBase = iBase;
+	if (iSystemBase > iDecimalBase) {
+		vInitDictionary();
+	}
+}
+
+//private section
+
+CNumber::CNumber(int* piNumber, int iLength) {
+	this->bPositive = true;
+	this->piNumber = piNumber;
+	this->iLength = iLength;
+}
+
+void CNumber::vInitDictionary() {
+	vDict = new std::vector<std::string>();
+	for (int i = 0; i < iSystemBase; i++) {
+
+		vDict->push_back(std::to_string(i) + " ");
+		//vDict.push_back("(" + std::to_string(i) + ")");
+	}
+}
 
 CNumber* CNumber::cUnsignedAddition(const CNumber& cLValue,const CNumber& cRValue){
 	int iMaxNumLen = std::max(cLValue.iLength, cRValue.iLength) + 1;
@@ -346,41 +342,47 @@ CNumber* CNumber::cUnsignedSubtraction(const CNumber& cLValue, const CNumber& cR
 		}
 		piSub[i] = iDigitResult;
 	}
-
 	CNumber* cResult = new CNumber(piSub, iMaxNumLen);
 
 	if (iBorrow != 0) {
 		cResult->bPositive = false;
 		cResult->vFlipToComplement();
 	}
-
 	cResult->vRemoveLeadingZeros();
 	return cResult;
 }
 
-void CNumber::vRemoveLeadingZeros(){
+ void CNumber::vFlipToComplement() {
+	 int* piComplement = new int[this->iLength];
+	 for (int i = 0; i < this->iLength; i++) {
+		 piComplement[i] = iSystemBase - 1 - this->piNumber[i];
+	 }
+	 piComplement[0]++;
+	 delete this->piNumber;
+	 this->piNumber = piComplement;
+ }
 
-	bool bNonZero = false;
-	int iZeroCounter = 0;
-	while (!bNonZero && iZeroCounter < this->iLength - 1) {
-		if (this->piNumber[this->iLength - iZeroCounter - 1] != 0) {
-			bNonZero = true;
-		}
-		else {
-			iZeroCounter++;
-		}
-	}
-	if (iZeroCounter > 0) {
-		int* piWithoutZeros = new int[this->iLength - iZeroCounter];
-		std::copy(this->piNumber, this->piNumber + (this->iLength - iZeroCounter), piWithoutZeros);
-		delete this->piNumber;
-		this->piNumber = piWithoutZeros;
-		this->iLength -= iZeroCounter;
-	}
-}
+ void CNumber::vRemoveLeadingZeros() {
+	 bool bNonZero = false;
+	 int iZeroCounter = 0;
+	 while (!bNonZero && iZeroCounter < this->iLength - 1) {
+		 if (this->piNumber[this->iLength - iZeroCounter - 1] != 0) {
+			 bNonZero = true;
+		 }
+		 else {
+			 iZeroCounter++;
+		 }
+	 }
+	 if (iZeroCounter > 0) {
+		 int* piWithoutZeros = new int[this->iLength - iZeroCounter];
+		 std::copy(this->piNumber, this->piNumber + (this->iLength - iZeroCounter), piWithoutZeros);
+		 delete this->piNumber;
+		 this->piNumber = piWithoutZeros;
+		 this->iLength -= iZeroCounter;
+	 }
+ }
 
- int CNumber::iGetResultingDivDigit( CNumber& cDiv)
- {
+ int CNumber::iGetResultingDivDigit(const CNumber& cDiv) {
 	 int i = 1;
 	 bool found = false;
 	 while (!found) {
@@ -395,31 +397,14 @@ void CNumber::vRemoveLeadingZeros(){
 	 return i;
  }
 
- void CNumber::vInitDictionary()
- {
-	 for(int i = 0; i < iSystemBase; i++){
-
-		 vDict.push_back( std::to_string(i) + " ");
-		 //vDict.push_back("(" + std::to_string(i) + ")");
-	 }
- }
-
- void CNumber::vSetSystemBase(int iBase)
- {
-	 iSystemBase = iBase;
-	 vInitDictionary();
- }
-
- int CNumber::iGetLenFromDecimal(int iValue)
- {
+ int CNumber::iGetLenFromDecimal(int iValue) {
 	 if (iValue == 0) {
 		 return 1;
 	 }
-	 return 1 + (int)(log2(iValue)/ log2(iSystemBase));
+	 return 1 + (int)(log2(iValue) / log2(iSystemBase));
  }
 
- void CNumber::vFromStringNoSeparator(std::string sValue)
- {
+ void CNumber::vNumFromStringNoSeparator(std::string sValue) {
 	 int iOffset = 0;
 	 int iPos = 0;
 	 if (sValue[0] == '-') {
@@ -442,12 +427,11 @@ void CNumber::vRemoveLeadingZeros(){
 	 }
  }
 
-void CNumber::vFromStringWithSeparator(std::string sValue)
- {
+ void CNumber::vNumFromStringWithSeparator(std::string sValue) {
 	 std::stringstream sStream(sValue);
 	 std::string part;
 	 int count = 0;
-	this->bPositive = sValue[0] != '-';
+	 this->bPositive = sValue[0] != '-';
 	 while (getline(sStream, part, ' ')) {
 		 count++;
 	 }
@@ -473,22 +457,5 @@ void CNumber::vFromStringWithSeparator(std::string sValue)
 		 count++;
 	 }
  }
-
- void CNumber::vFlipToComplement() {
-	 int* piComplement = new int[this->iLength];
-	 for (int i = 0; i < this->iLength; i++) {
-		 piComplement[i] = iSystemBase - 1 - this->piNumber[i];
-	 }
-	 piComplement[0]++;
-	 delete this->piNumber;
-	 this->piNumber = piComplement;
- }
-
- std::ostream& operator<<(std::ostream& os, const CNumber& cValue) {
-	 os << cValue.sToString();
-	 return os;
- }
-
- std::vector<std::string> CNumber::vDict;
 
  

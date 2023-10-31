@@ -1,9 +1,9 @@
 #pragma once
-#include <sstream>	//gotta get rid of this and create custom string, will be able to forward declare instead
+#include <sstream>	
 #include <vector>
-#include <string>
+
 const int iDefualtNumberLength = 1;
-static int iSystemBase = 13;
+static int iSystemBase = 10;
 const int iDecimalBase = 10;
 
 
@@ -11,6 +11,7 @@ class CNumber
 {
 public:
 	friend std::ostream& operator<<(std::ostream& os, const CNumber& cValue);
+
 	//so that the order is interchangable
 	//int and CNumber
 	inline friend CNumber operator+(int iValue, const CNumber& cValue) { return cValue + iValue; }
@@ -18,21 +19,33 @@ public:
 	inline friend CNumber operator*(int iValue, const CNumber& cValue) { return cValue * iValue; }
 	inline friend CNumber operator/(int iValue, const CNumber& cValue) { return cValue / iValue; }
 
+	inline friend bool operator==(int iValue, const CNumber& cValue) { return  cValue == iValue; }
+	inline friend bool operator<=(int iValue, const CNumber& cValue) { return cValue >= iValue; }
+	inline friend bool operator<(int iValue, const CNumber& cValue) { return cValue > iValue; }
+	inline friend bool operator>=(int iValue, const CNumber& cValue) { return cValue <= iValue; }
+	inline friend bool operator>(int iValue, const CNumber& cValue) { return cValue < iValue; }
+
 public:
+	//Constructors 
 	CNumber();
-	CNumber(const int iValue);
-	CNumber(const CNumber& cValue);
+	CNumber(int iValue);
 	CNumber(const std::string& sValue);
+	CNumber(const CNumber& cValue);
 	//CNumber(CNumber&& cValue) noexcept;
 	inline ~CNumber() { if(piNumber != NULL) delete piNumber; }
 
-	CNumber operator-();
+	//Assignments
+	void operator=(const int iValue);
+	void operator=(const std::string& sValue);
+	void operator=(const CNumber& cValue);
+	//void operator=(CNumber&& cValue);
+
+	//Negation
+	CNumber operator-()const;
 
 	//CNumber and CNumber
-	//void operator=(CNumber&& cValue);
-	void operator=(const CNumber& cValue);
 	CNumber operator+(const CNumber& cValue)const;
-	CNumber operator-(const CNumber& cValue)const;
+	inline CNumber operator-(const CNumber& cValue)const { return *this + (-cValue); }
 	CNumber operator*(const CNumber& cValue)const;
 	CNumber operator/(const CNumber& cValue)const;
 
@@ -41,16 +54,13 @@ public:
 	CNumber operator*=(const CNumber& cValue);
 	CNumber operator/=(const CNumber& cValue);
 
-	bool operator==(const CNumber& cValue)const;
-	bool operator<=(const CNumber& cValue)const;
+	inline bool operator==(const CNumber& cValue)const;
+	bool operator<=(const CNumber& cValue)const { return (*this < cValue) || (*this == cValue); }
 	bool operator<(const CNumber& cValue)const;
-	bool operator>=(const CNumber& cValue)const;
-	bool operator>(const CNumber& cValue)const;
+	bool operator>=(const CNumber& cValue)const { return cValue <= *this; }
+	bool operator>(const CNumber& cValue)const { return cValue < *this; }
 
 	//CNumber and int
-
-	void operator=(const std::string& sValue);
-	void operator=(const int iValue);
 	inline CNumber operator+(int iValue) const { return *this + CNumber(iValue); }
 	inline CNumber operator-(int iValue) const { return *this - CNumber(iValue); }
 	inline CNumber operator*(int iValue) const { return *this * CNumber(iValue); }
@@ -67,8 +77,8 @@ public:
 	inline bool operator>=(int iValue)const { return *this >= CNumber(iValue); }
 	inline bool operator>(int iValue)const { return *this > CNumber(iValue); }
 
-	
 	std::string sToString() const;
+
 	static CNumber abs(const CNumber& cValue);
 	static void vSetSystemBase(int iBase);
 
@@ -76,12 +86,14 @@ private:
 	int* piNumber;
 	int iLength;
 	bool bPositive;
-	static std::vector<std::string> vDict;
+	static std::vector<std::string>* vDict;
 	
 
 private:
 
 	CNumber(int* piNumber, int iLength);
+
+	static void vInitDictionary();
 
 	/* Performs addition as if on two positive numbers*/
 	static CNumber* cUnsignedAddition(const CNumber &cLValue, const CNumber &cRValue);
@@ -90,15 +102,9 @@ private:
 
 	void vFlipToComplement();
 	void vRemoveLeadingZeros();
-	int iGetResultingDivDigit( CNumber &cDiv);
-	static void vInitDictionary();
-
+	int iGetResultingDivDigit(const CNumber &cDiv);
 	int iGetLenFromDecimal(int iValue);
-	void vFromStringNoSeparator(std::string sValue);
-	void vFromStringWithSeparator(std::string sValue);
-
-
-	
-
+	void vNumFromStringNoSeparator(std::string sValue);
+	void vNumFromStringWithSeparator(std::string sValue);
 
 };
