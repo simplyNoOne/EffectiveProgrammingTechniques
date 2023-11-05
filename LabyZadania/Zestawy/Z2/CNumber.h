@@ -15,9 +15,10 @@ public:
 	//so that the order is interchangable
 	//int and CNumber
 	inline friend CNumber operator+(int iValue, const CNumber& cValue) { return cValue + iValue; }
-	inline friend CNumber operator-(int iValue, const CNumber& cValue) { return cValue - iValue; }
+	inline friend CNumber operator-(int iValue, const CNumber& cValue) { return CNumber(iValue) - cValue; }
 	inline friend CNumber operator*(int iValue, const CNumber& cValue) { return cValue * iValue; }
-	inline friend CNumber operator/(int iValue, const CNumber& cValue) { return cValue / iValue; }
+	inline friend CNumber operator/(int iValue, const CNumber& cValue) { return CNumber(iValue) / cValue; }
+	inline friend CNumber operator%(int iValue, const CNumber& cValue) { return CNumber(iValue) % cValue; }
 
 	inline friend bool operator==(int iValue, const CNumber& cValue) { return  cValue == iValue; }
 	inline friend bool operator<=(int iValue, const CNumber& cValue) { return cValue >= iValue; }
@@ -25,7 +26,7 @@ public:
 	inline friend bool operator>=(int iValue, const CNumber& cValue) { return cValue <= iValue; }
 	inline friend bool operator>(int iValue, const CNumber& cValue) { return cValue < iValue; }
 
-public:
+
 	//Constructors 
 	CNumber();
 	CNumber(int iValue);
@@ -48,23 +49,26 @@ public:
 	inline CNumber operator-(const CNumber& cValue)const { return *this + (-cValue); }
 	CNumber operator*(const CNumber& cValue)const;
 	CNumber operator/(const CNumber& cValue)const;
+	CNumber operator%(const CNumber& cValue)const;
+
 
 	CNumber operator+=(const CNumber& cValue);
 	CNumber operator-=(const CNumber& cValue);
 	CNumber operator*=(const CNumber& cValue);
 	CNumber operator/=(const CNumber& cValue);
 
-	inline bool operator==(const CNumber& cValue)const;
-	bool operator<=(const CNumber& cValue)const { return (*this < cValue) || (*this == cValue); }
+	bool operator==(const CNumber& cValue)const;
+	inline bool operator<=(const CNumber& cValue)const { return (*this < cValue) || (*this == cValue); }
 	bool operator<(const CNumber& cValue)const;
-	bool operator>=(const CNumber& cValue)const { return cValue <= *this; }
-	bool operator>(const CNumber& cValue)const { return cValue < *this; }
+	inline bool operator>=(const CNumber& cValue)const { return cValue <= *this; }
+	inline bool operator>(const CNumber& cValue)const { return cValue < *this; }
 
 	//CNumber and int
 	inline CNumber operator+(int iValue) const { return *this + CNumber(iValue); }
 	inline CNumber operator-(int iValue) const { return *this - CNumber(iValue); }
 	inline CNumber operator*(int iValue) const { return *this * CNumber(iValue); }
 	inline CNumber operator/(int iValue) const { return *this / CNumber(iValue); }
+	inline CNumber operator%(int iValue) const { return *this % CNumber(iValue); }
 
 	inline CNumber operator+=(int iValue) { return *this += CNumber(iValue); }
 	inline CNumber operator-=(int iValue) { return *this -= CNumber(iValue); }
@@ -80,6 +84,7 @@ public:
 	std::string sToString() const;
 
 	static CNumber abs(const CNumber& cValue);
+	static CNumber pow(const CNumber& cValue, int iExp);
 	static void vSetSystemBase(int iBase);
 
 private:
@@ -96,9 +101,9 @@ private:
 	static void vInitDictionary();
 
 	/* Performs addition as if on two positive numbers*/
-	static CNumber* cUnsignedAddition(const CNumber &cLValue, const CNumber &cRValue);
+	static CNumber cUnsignedAddition(const CNumber &cLValue, const CNumber &cRValue);
 	/* Performs subtraction as if on two positive numbers*/
-	static CNumber* cUnsignedSubtraction(const CNumber& cLValue,const CNumber& cRValue);
+	static CNumber cUnsignedSubtraction(const CNumber& cLValue,const CNumber& cRValue);
 
 	void vFlipToComplement();
 	void vRemoveLeadingZeros();
@@ -106,5 +111,6 @@ private:
 	int iGetLenFromDecimal(int iValue);
 	void vNumFromStringNoSeparator(std::string sValue);
 	void vNumFromStringWithSeparator(std::string sValue);
+
 
 };

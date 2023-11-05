@@ -2,112 +2,40 @@
 
 #include <iostream>
 #include "CNumber.h"
+#include "tests.h"
+
+using namespace Tests;
 
 void vZ2start()
 {
-	//CNumber::vSetSystemBase(12);
-
-	CNumber test(187379090);
-	//test / 12;
-	std::cout << test << std::endl;
-
 	
-	CNumber c123;
-	c123 = 123;
-
-	CNumber c99;
-	c99 = 99;
-
-	CNumber c1024(1024);
-
-	CNumber res;
-	res = c99 * c123;		//12177
-	std::cout<<res.sToString()<<std::endl;
-
-	res = c1024 - c99;
-	res  += 1;
-	std::cout << res.sToString() << std::endl;
-
-	res = c99 - c1024;
-	std::cout << res.sToString() << std::endl;
-
-	res = c123 - 666;
-	std::cout << res.sToString() << std::endl;
-
-	CNumber c12 = 12;
-	res = c12 * c12;
-	std::cout << res.sToString() << std::endl;
-
-	c12 = -c12;
-
-	c12 = "001";
-	std::cout << c12 << std::endl;
-
-	res = res / c12;
-	std::cout << res.sToString() << std::endl;
-
-	/*CNumber cBigDividend(195950421);
-	//CNumber cBigDividend (19921);
-	std::cout << (cBigDividend / 1).sToString() << std::endl;
-	std::cout << (cBigDividend / 8975).sToString() << std::endl;
-	std::cout << (cBigDividend / 643).sToString() << std::endl;
-	std::cout << (cBigDividend / 21).sToString() << std::endl;
-	std::cout << (cBigDividend / 12034).sToString() << std::endl;
-	std::cout << (cBigDividend / 991).sToString() << std::endl;
-	std::cout << (cBigDividend / 3592).sToString() << std::endl;
-	std::cout << (cBigDividend / -5253).sToString() << std::endl;
-	std::cout << (cBigDividend / -7819).sToString() << std::endl;
-	std::cout << (cBigDividend / -38) << std::endl;
-	std::cout << (cBigDividend / -9) << std::endl;
-
-	*/
-	//BUT HOW ABOUT NUMBERS GREATER THAN INT?
-	//HOW TO GET 972361962_41564218_897421???
-	// Answer: EASY:
-	//take 41564218, multiply by 10^6
-	//add 897421
-	//multiply 10^8 by 10^6 to get 10^14
-	//take 972361962, multiply by 10^14
-	//add the previous result
-
-	CNumber biggie(((CNumber(41564218) * std::pow(10, 6)) + CNumber(897421)) + (CNumber(972361962) * CNumber(std::pow(10, 8)) * std::pow(10, 6)));
-	//see, it works
-	std::cout << biggie<< std::endl;
-
-	std::cout << 7 + biggie << std::endl;
-
-	//res = c1024 / 1;
-	//std::cout << res.sToString() << std::endl;
-
 	
-	/*
-	CNumber c8 = 22;
-	CNumber nc3 = -10;
-	CNumber res;
+    vRunTests();
+  
+    CNumber::vSetSystemBase(7);
+    CNumber test("1000000000000000000000000000000000000000000000");
+    std::cout << (test / 100) << std::endl;
+    std::cout << (test / CNumber("202"))<<std::endl;
+    std::cout << (test / 49) << std::endl;
+    std::cout << (test / CNumber("100")) << std::endl;
+    std::cout << (test % 7) << std::endl;
 
-	res = 0;
+    CNumber::vSetSystemBase(13);
+    CNumber n1("12 12 11 10 8 9 3 0 1 12 2 1 2 3 4 5 6 7 8 9 0 0 0 0 0 10 12 11 10 9 10 2 1 3 7 6 5 0");
+    CNumber n2("-10 0 0 0 0 10 12 11 10 9 10 2 1 3 7 6 5 0 9 8 12 6 7");
+    std::cout << (n1 + n2) << std::endl;
+    std::cout << (n1 - n2) << std::endl;
+    std::cout << (n1 * n2) << std::endl;
+    std::cout << (n1 / n2) << std::endl;
+    std::cout << (n2 % 13) << std::endl;
 
-	//return;
-	res = c8 + nc3;
-	std::cout << res.sToString() << std::endl;
-
-	res = c8 - nc3;
-	std::cout << res.sToString() << std::endl;
-
-	res = nc3 - c8;
-	std::cout << res.sToString() << std::endl;
-
-	res = c8 * nc3;
-	std::cout << res.sToString() << std::endl;
-
-	CNumber c5 = -5;
-
-	res = c5/ 2;
-	std::cout << res.sToString() << std::endl;
-
-	res = c8 / nc3;
-	std::cout << res.sToString() << std::endl;
-
-	*/
-
+    CNumber::vSetSystemBase(10);
+    CNumber n3("-7326835628476235864523875632876239857329876395878753290523895283753029253728657869835909023507823059832032859");
+    CNumber n4("-1837298789375298532737");
+    std::cout << (n3 + n4) << std::endl;
+    std::cout << (n3 - n4) << std::endl;
+    std::cout << (n3 * n4) << std::endl;
+    std::cout << (n3 / n4) << std::endl;
+    std::cout << (n3 % 10) << std::endl;
+    
 }
