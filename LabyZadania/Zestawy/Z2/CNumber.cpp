@@ -2,6 +2,7 @@
 
 #include <cmath>
 
+int CNumber::iSystemBase = 10;
 std::vector<std::string>* CNumber::vDict = NULL;
 
 //public section
@@ -310,6 +311,17 @@ void CNumber::vSetSystemBase(int iBase) {
 	if (iSystemBase > iDecimalBase) {
 		vInitDictionary();
 	}
+}
+
+CNumber CNumber::cDivRest(const CNumber& cOther, CNumber* pcRest)
+{
+	if (*this % cOther == 0) {
+		pcRest = NULL;
+	}
+	else {
+		*pcRest = *this % cOther;
+	}
+	return *this / cOther;
 }
 
 //private section

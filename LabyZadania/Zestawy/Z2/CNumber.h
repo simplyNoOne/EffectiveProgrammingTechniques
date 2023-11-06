@@ -3,7 +3,6 @@
 #include <vector>
 
 const int iDefualtNumberLength = 1;
-static int iSystemBase = 10;
 const int iDecimalBase = 10;
 
 
@@ -87,10 +86,15 @@ public:
 	static CNumber pow(const CNumber& cValue, int iExp);
 	static void vSetSystemBase(int iBase);
 
+	CNumber cDivRest(const CNumber& cOther, CNumber* pcRest);
+
 private:
 	int* piNumber;
 	int iLength;
 	bool bPositive;
+
+	//statics
+	static int iSystemBase;
 	static std::vector<std::string>* vDict;
 	
 
