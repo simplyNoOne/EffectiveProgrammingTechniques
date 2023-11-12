@@ -51,5 +51,9 @@ void vZ2start()
     CNumber rest2;
     std::cout << dzielna2.cDivRest(-3,&rest2) << std::endl;
     std::cout << rest2 << std::endl;
+
+
+    CNumber::vSetSystemBase(4);
+    std::cout << CNumber::pow(CNumber("21301201213"), 2023) << std::endl;
     
 }
