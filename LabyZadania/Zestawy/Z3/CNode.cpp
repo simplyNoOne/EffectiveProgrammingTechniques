@@ -1,6 +1,8 @@
 #include "CNode.h"
+#include "CError.h"
 #include <sstream>
 #include <iomanip>
+#include "CVariablesData.h"
 
 std::vector<std::pair<E_OPERATION_TYPE, std::pair<std::string, int>>> CNode::vOperationDefs = {
 	{EOT_ADDITION,{"+", 2}},
@@ -32,43 +34,28 @@ CNode::~CNode(){
 	}
 }
 
-bool CNode::bParseNode(std::string sFormula, int& iOffset, char cSeparator, std::string& sErrorMessage, E_ERROR_TYPE& eError, std::vector<std::string>& vVars, std::vector<int>& vVarCount){
+void CNode::bParseNode(std::string sFormula, int& iOffset, char cSeparator, CError& cError, CVariablesData* cVariables){
 	
 	if (sFormula.length() <= iOffset) {
 		this->vMakeDefualt();
-		eError = EET_MISSING_ARGUMENT;
-		return false;
+		cError.vSetType(EET_MISSING_ARGUMENT);
+		return;
 	}
 	std::string part = sGetNextTokenFromInput(sFormula, cSeparator, iOffset);
 	int iNumArguments;
+	E_ERROR_TYPE eError = EET_NONE;
 	eNodeType = eDetermineNodeType(part, iNumArguments, eOperationType, sVariableName, dConstantValue, eError);
+	cError.vAppendMessage(false, eError, part);
 	if (eNodeType == ENT_OPERATION) {
 		bool bRet = true;
 		for (int i = 0; i < iNumArguments; i++) {
 			vpcChildren.push_back(new CNode(this));
-			if (!vpcChildren.at(i)->bParseNode(sFormula, iOffset, cSeparator, sErrorMessage, eError, vVars, vVarCount)) {
-				sErrorMessage = "Missing arguments for operator. Default value inserted";
-				bRet = false;
-			}
+			vpcChildren.at(i)->bParseNode(sFormula, iOffset, cSeparator, cError, cVariables);
+			cError.vAppendMessage(false, part);
 		}
-		return bRet;
 	}
 	else if (eNodeType == ENT_VARIABLE){
-		int it = 0;
-		while(it < vVars.size() && vVars.at(it) != sVariableName) {
-			it++;
-		}
-		if (it == vVars.size()) {
-			vVars.push_back(sVariableName);
-			vVarCount.push_back(1);
-		}
-		else {
-			vVarCount.at(it)++;
-		}
-		return true;
-	}
-	else {
-		return true;
+		cVariables->vAddVariable(sVariableName);
 	}
 }
 
@@ -98,20 +85,16 @@ std::string CNode::sNodeRepresentation()
 	return sToReturn;
 }
 
-double CNode::dEvaluateNode(std::vector<std::string>& vsVariableNames, std::vector<double>& vdVariableValues)
+double CNode::dEvaluateNode(CVariablesData* cVariables)
 {
 	if (eNodeType == ENT_CONSTANT) {
 		return dConstantValue;
 	}
 	else if (eNodeType == ENT_VARIABLE) {
-		int it = 0;
-		while (vsVariableNames.at(it) != sVariableName) {
-			it++;
-		}
-		return vdVariableValues.at(it);
+		return cVariables->dGetVariableData(sVariableName);
 	}
 	else {
-		return dCalculateOperation(vsVariableNames, vdVariableValues);
+		return dCalculateOperation(cVariables);
 	}
 }
 
@@ -152,31 +135,31 @@ E_NODE_TYPE CNode::eDetermineNodeType(std::string input, int& iNumArguments, E_O
 	return ENT_VARIABLE;
 }
 
-double CNode::dCalculateOperation(std::vector<std::string>& vsVariableNames, std::vector<double>& vdVariableValues)
+double CNode::dCalculateOperation(CVariablesData* cVariables)
 {
 	if (eOperationType == EOT_ADDITION) {
-		return vpcChildren.at(0)->dEvaluateNode(vsVariableNames, vdVariableValues) + vpcChildren.at(1)->dEvaluateNode(vsVariableNames, vdVariableValues);
+		return vpcChildren.at(0)->dEvaluateNode(cVariables) + vpcChildren.at(1)->dEvaluateNode(cVariables);
 	}
 	else if (eOperationType == EOT_SUBTRACTION) {
-		return vpcChildren.at(0)->dEvaluateNode(vsVariableNames, vdVariableValues) - vpcChildren.at(1)->dEvaluateNode(vsVariableNames, vdVariableValues);
+		return vpcChildren.at(0)->dEvaluateNode(cVariables) - vpcChildren.at(1)->dEvaluateNode(cVariables);
 	}
 	else if (eOperationType == EOT_MULTIPLICATION) {
-		return vpcChildren.at(0)->dEvaluateNode(vsVariableNames, vdVariableValues) * vpcChildren.at(1)->dEvaluateNode(vsVariableNames, vdVariableValues);
+		return vpcChildren.at(0)->dEvaluateNode(cVariables) * vpcChildren.at(1)->dEvaluateNode(cVariables);
 	}
 	else if (eOperationType == EOT_DIVISION) {
-		return vpcChildren.at(0)->dEvaluateNode(vsVariableNames, vdVariableValues) / vpcChildren.at(1)->dEvaluateNode(vsVariableNames, vdVariableValues);
+		return vpcChildren.at(0)->dEvaluateNode(cVariables) / vpcChildren.at(1)->dEvaluateNode(cVariables);
 	}
 	else if (eOperationType == EOT_POWER) {
-		return std::pow(vpcChildren.at(0)->dEvaluateNode(vsVariableNames, vdVariableValues), vpcChildren.at(1)->dEvaluateNode(vsVariableNames, vdVariableValues));
+		return std::pow(vpcChildren.at(0)->dEvaluateNode(cVariables), vpcChildren.at(1)->dEvaluateNode(cVariables));
 	}
 	else if (eOperationType == EOT_LOG) {
-		return std::log2(vpcChildren.at(1)->dEvaluateNode(vsVariableNames, vdVariableValues)) / std::log2(vpcChildren.at(0)->dEvaluateNode(vsVariableNames, vdVariableValues));
+		return std::log2(vpcChildren.at(1)->dEvaluateNode(cVariables)) / std::log2(vpcChildren.at(0)->dEvaluateNode(cVariables));
 	}
 	else if (eOperationType == EOT_SIN) {
-		return std::sin(vpcChildren.at(0)->dEvaluateNode(vsVariableNames, vdVariableValues));
+		return std::sin(vpcChildren.at(0)->dEvaluateNode(cVariables));
 	}
 	else if (eOperationType == EOT_COS) {
-		return std::cos(vpcChildren.at(0)->dEvaluateNode(vsVariableNames, vdVariableValues));
+		return std::cos(vpcChildren.at(0)->dEvaluateNode(cVariables));
 	}
 }
 
@@ -198,25 +181,16 @@ bool CNode::bIsNum(std::string& sToCheck){
 	return true;
 }
 
-void CNode::vAttachNodeToLastElement(CNode* pcOtherRoot, std::vector<std::string>& vVars, std::vector<int>& vVarCount)
+void CNode::vAttachNodeToLastElement(CNode* pcOtherRoot, CVariablesData* cVariables)
 {
 	if (eNodeType == ENT_OPERATION) {
 		CNode* pcLastChild = vpcChildren.at(vpcChildren.size() - 1);
 		if (pcLastChild->eNodeType == ENT_OPERATION) {
-			pcLastChild->vAttachNodeToLastElement(pcOtherRoot, vVars, vVarCount);
+			pcLastChild->vAttachNodeToLastElement(pcOtherRoot, cVariables);
 		}
 		else {
 			if (pcLastChild->eNodeType == ENT_VARIABLE) {
-				int i = 0;
-				while (i < vVars.size() && vVars.at(i) != pcLastChild->sVariableName) {
-					i++;
-				}
-				if (--vVarCount.at(i) == 0) {
-					std::vector<int>::iterator itToRemC = vVarCount.begin() + i;
-					vVarCount.erase(itToRemC);
-					std::vector<std::string>::iterator itToRemV = vVars.begin() + i; 
-					vVars.erase(itToRemV);
-				}
+				cVariables->vDecreaseVarUsage(pcLastChild->sVariableName);
 				
 			}
 			delete pcLastChild;

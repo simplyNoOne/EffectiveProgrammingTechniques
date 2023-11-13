@@ -56,6 +56,12 @@
     <ClCompile Include="Zestawy\Z3\CTree.cpp">
       <Filter>Source Files\Zestawy\Z3</Filter>
     </ClCompile>
+    <ClCompile Include="Zestawy\Z3\CError.cpp">
+      <Filter>Source Files\Zestawy\Z3</Filter>
+    </ClCompile>
+    <ClCompile Include="Zestawy\Z3\CVariablesData.cpp">
+      <Filter>Source Files\Zestawy\Z3</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Zestawy\Z1\z1.h">
@@ -89,6 +95,12 @@
       <Filter>Source Files\Zestawy\Z3</Filter>
     </ClInclude>
     <ClInclude Include="Zestawy\Z3\ETokens.h">
+      <Filter>Source Files\Zestawy\Z3</Filter>
+    </ClInclude>
+    <ClInclude Include="Zestawy\Z3\CError.h">
+      <Filter>Source Files\Zestawy\Z3</Filter>
+    </ClInclude>
+    <ClInclude Include="Zestawy\Z3\CVariablesData.h">
       <Filter>Source Files\Zestawy\Z3</Filter>
     </ClInclude>
   </ItemGroup>

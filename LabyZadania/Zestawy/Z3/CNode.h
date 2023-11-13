@@ -4,22 +4,30 @@
 #include <string>
 #include "ETokens.h"
 
+class CError;
+class CVariablesData;
+
 class CNode {
 public:
 	inline CNode(CNode* pcParent) { this->pcParent = pcParent; }
 	CNode(CNode* pcParent, CNode& cOriginal);
 	~CNode();
 
-	bool bParseNode(std::string sFormula, int& iOffset, char cSeparator, std::string& sErrorMessage, E_ERROR_TYPE& eError, std::vector<std::string> &vVars, std::vector<int>&vVarCount);
+	void bParseNode(std::string sFormula, int& iOffset, char cSeparator, CError& cError, CVariablesData* cVariables);
 	std::string sNodeRepresentation();
 	
-	double dEvaluateNode(std::vector<std::string>& vsVariableNames, std::vector<double>& vdVariableValues);
+	inline CNode* pcGetParent() { return pcParent; }
+	inline void vSetParent(CNode* pcNewParent) { pcParent = pcNewParent; }
+	inline std::vector<CNode*>* pvpcGetChildren() { return &vpcChildren; }
+
+	double dEvaluateNode(CVariablesData* cVariables);
 	static std::string sGetNextTokenFromInput(std::string sInput, char cSeparator, int& iOffset);
 	static bool bIsNum(std::string& sToCheck);
 
 	inline E_NODE_TYPE eGetNodeType() { return eNodeType; }
 
-	void vAttachNodeToLastElement(CNode* pcOtherRoot, std::vector<std::string>& vVars, std::vector<int>& vVarCount);
+	void vAttachNodeToLastElement(CNode* pcOtherRoot, CVariablesData* cVariables);
+	std::string sGetVarName() { return sVariableName; }
 private:
 	CNode* pcParent;
 	std::vector<CNode*> vpcChildren;
@@ -34,6 +42,6 @@ private:
 	static std::vector<std::pair<E_OPERATION_TYPE, std::pair<std::string, int>>> vOperationDefs;
 	static E_NODE_TYPE eDetermineNodeType(std::string input, int &iNumArguments, E_OPERATION_TYPE& eOpType, std::string& sVarName, double& dValue, E_ERROR_TYPE& eError);
 	
-	double dCalculateOperation(std::vector<std::string>& vsVariableNames, std::vector<double>& vdVariableValues);
+	double dCalculateOperation(CVariablesData* cVariables);
 
 };

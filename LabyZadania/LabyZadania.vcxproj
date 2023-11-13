@@ -134,9 +134,11 @@
     <ClCompile Include="Zestawy\Z2\CNumber.cpp" />
     <ClCompile Include="Zestawy\Z2\tests.cpp" />
     <ClCompile Include="Zestawy\Z2\z2.cpp" />
+    <ClCompile Include="Zestawy\Z3\CError.cpp" />
     <ClCompile Include="Zestawy\Z3\CInterface.cpp" />
     <ClCompile Include="Zestawy\Z3\CNode.cpp" />
     <ClCompile Include="Zestawy\Z3\CTree.cpp" />
+    <ClCompile Include="Zestawy\Z3\CVariablesData.cpp" />
     <ClCompile Include="Zestawy\Z3\z3.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -146,9 +148,11 @@
     <ClInclude Include="Zestawy\Z2\CNumber.h" />
     <ClInclude Include="Zestawy\Z2\tests.h" />
     <ClInclude Include="Zestawy\Z2\z2.h" />
+    <ClInclude Include="Zestawy\Z3\CError.h" />
     <ClInclude Include="Zestawy\Z3\CInterface.h" />
     <ClInclude Include="Zestawy\Z3\CNode.h" />
     <ClInclude Include="Zestawy\Z3\CTree.h" />
+    <ClInclude Include="Zestawy\Z3\CVariablesData.h" />
     <ClInclude Include="Zestawy\Z3\ETokens.h" />
     <ClInclude Include="Zestawy\Z3\z3.h" />
   </ItemGroup>

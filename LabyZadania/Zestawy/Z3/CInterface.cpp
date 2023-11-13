@@ -5,12 +5,13 @@
 #include <string>
 #include <iomanip>
 #include <cstdlib>
+#include "CError.h"
 
 char CInterface::cSeparator = ' ';
 
 void CInterface::vDisplayOperations()
 {
-	std::cout << "Available operations:\n"
+	std::cout << "Look at all the stuff you can do:\n"
 		<< "\tenter <formula>\n"
 		<< "\tvars - show variables\n"
 		<< "\tprint - show tree\n"
@@ -22,7 +23,7 @@ void CInterface::vDisplayOperations()
 
 std::string CInterface::vGetUserInput()
 {
-	std::cout << "Enter operation: ";
+	std::cout << "So, what do you want?: ";
 	std::cin >> std::ws;
 	std::string sResponse;
 	std::getline(std::cin, sResponse);
@@ -73,10 +74,13 @@ void CInterface::vRunInterface()
 		eAction = eInterpretUserAction(sUserResponse);
 		if (eAction != EUA_QUIT && eAction != EUA_NONE) {
 			if (eAction == EUA_ENTER) {
-				std::string sMessage;
+				CError cError;
 				pcTree->vClearTree();
-				pcTree->vParseFormula(sUserResponse, sMessage, cSeparator);
-				std::cout << sMessage<<std::endl;
+				pcTree->vParseFormula(sUserResponse, cError, cSeparator);
+				if (cError.bErrorFound()) {
+					std::cout << cError.sGetErrorMessage() << std::endl;
+					std::cout<< "\nResulting formula:\n" << pcTree->sReturnFormula();
+				}
 			}
 			else if (eAction == EUA_PRINT) {
 				std::cout << "Your current formula in Prefix Notation:\n";
@@ -90,20 +94,30 @@ void CInterface::vRunInterface()
 					std::cout << "There is nothing to compute yet, for the love of G...\n";
 				}
 				else {
-					std::cout << pcTree->sCompute(sUserResponse, cSeparator)<<std::endl;
+					CError cError;
+					std::string sResult = pcTree->sCompute(sUserResponse, cSeparator, cError);
+					std::cout <<sResult<<std::endl;
 				}
 			}
 			else {
-				CTree* pcTempTree = new CTree();
-				std::string sMessage;
-				pcTempTree->vParseFormula(sUserResponse, sMessage, cSeparator);
-				std::cout << sMessage << std::endl;
+				if (!pcTree->bExists()) {
+					std::cout << "What do you want to join your formula to? There is nothing there yet, you imbecile\n";
+				}
+				else {
+					CTree* pcTempTree = new CTree();
+					CError cError;
+					pcTempTree->vParseFormula(sUserResponse, cError, cSeparator);
+					if (cError.bErrorFound()) {
+						std::cout << cError.sGetErrorMessage() << std::endl;
+					}
 
-				std::cout << "\nParsing...\n";
-				*pcTree = *pcTree + *pcTempTree;
-				delete pcTempTree;
+					std::cout << "\nParsing...\n";
+					*pcTree = *pcTree + *pcTempTree;
+					delete pcTempTree;
+				}
+				
 			}
-			std::cout << "Press enter to proceed.";
+			std::cout << "\nPress enter to proceed.";
 			std::getline(std::cin, sUserResponse);
 			
 		}
