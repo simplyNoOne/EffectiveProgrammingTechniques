@@ -9,12 +9,17 @@ class CInterface {
 public:
 	inline CInterface() { pcTree = nullptr; }
 	inline ~CInterface() { delete pcTree; }
+
+	void vRunInterface();
+
+	//static
 	static void vDisplayOperations();
 	static std::string vGetUserInput();
 	static E_USER_ACTION eInterpretUserAction(std::string& sUserResponse);
-	void vRunInterface();
-
+	
 private:
 	CTree* pcTree;
+
+	//static
 	static char cSeparator;
 };

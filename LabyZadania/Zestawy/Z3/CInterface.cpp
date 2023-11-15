@@ -94,9 +94,14 @@ void CInterface::vRunInterface()
 					std::cout << "There is nothing to compute yet, for the love of G...\n";
 				}
 				else {
-					CError cError;
-					std::string sResult = pcTree->sCompute(sUserResponse, cSeparator, cError);
-					std::cout <<sResult<<std::endl;
+					try {
+						CError cError;
+						std::string sResult = pcTree->sCompute(sUserResponse, cSeparator, cError);
+						std::cout << sResult << std::endl;
+					}
+					catch (divByZero& err) {
+						std::cout << err.what()<<std::endl;
+					}
 				}
 			}
 			else {
