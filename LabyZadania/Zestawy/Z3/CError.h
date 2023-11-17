@@ -26,7 +26,7 @@ public:
 	inline E_ERROR_TYPE eGetType() { return eType; }
 	inline std::string sGetErrorMessage() { return sErrorMessage; }
 	
-	inline void vSetType(E_ERROR_TYPE eErrorType) { eType = eErrorType; }
+	inline void vSetType(E_ERROR_TYPE eErrorType) { eType = eErrorType; bIsError = true; }
 
 
 private:

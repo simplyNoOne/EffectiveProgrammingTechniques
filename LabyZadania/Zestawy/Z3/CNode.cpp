@@ -43,13 +43,20 @@ CNode::~CNode(){
 }
 
 void CNode::bParseNode(std::string sFormula, int& iOffset, char cSeparator, CError& cError){
-	
+
 	if (sFormula.length() <= iOffset) {
 		this->vMakeDefualt();
 		cError.vSetType(EET_MISSING_ARGUMENT);
 		return;
 	}
+
 	std::string part = CInputParsing::sGetNextTokenFromInput(sFormula, cSeparator, iOffset);
+	if (part == "") {
+		this->vMakeDefualt();
+		cError.vSetType(EET_MISSING_ARGUMENT);
+		return;
+	}
+
 	int iNumArguments;
 	E_ERROR_TYPE eError = EET_NONE;
 	eNodeType = eDetermineNodeType(part, iNumArguments, eOperationType, sVariableName, dConstantValue, eError);
@@ -192,13 +199,21 @@ E_NODE_TYPE CNode::eDetermineNodeType(std::string input, int& iNumArguments, E_O
 		dValue = strtod(input.c_str(), NULL);
 		return ENT_CONSTANT;
 	}
+	bool bHasLetter = false;
 	for (int i = 0; i < input.length(); i++) {
 		if (isdigit(input.at(i)) || isalpha(input.at(i))) {
 			sVarName += input.at(i);
+			if (isalpha(input.at(i))) {
+				bHasLetter = true;
+			}
 		}
 		else {
 			eError = EET_INVALID_ARGUMENT;
 		}
+	}
+	if (!bHasLetter) {
+		eError = EET_INVALID_ARGUMENT;
+		sVarName += 'x';
 	}
 	return ENT_VARIABLE;
 }
@@ -208,7 +223,7 @@ E_NODE_TYPE CNode::eDetermineNodeType(std::string input, int& iNumArguments, E_O
 
 std::string CInputParsing::sGetNextTokenFromInput(std::string sInput, char cSeparator, int& iOffset)
 {
-	while (sInput.at(iOffset) == cSeparator) {
+	while (iOffset < sInput.length() && sInput.at(iOffset) == cSeparator) {
 		iOffset++;
 	}
 	int iEnd = sInput.find(cSeparator, iOffset);

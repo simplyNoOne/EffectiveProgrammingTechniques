@@ -12,7 +12,9 @@ void CTree::vParseFormula(std::string sFormula, CError& cError, char cSeparator)
 	E_ERROR_TYPE eError = EET_NONE;
 	pcTreeRoot->bParseNode(sFormula, iOffset, cSeparator, cError);
 	if (iOffset < sFormula.length()) {
-		cError.vAppendMessage(false, EET_TOO_MANY_ARGUMENTS);
+		if (CInputParsing::sGetNextTokenFromInput(sFormula, cSeparator, iOffset) != "") {
+			cError.vAppendMessage(false, EET_TOO_MANY_ARGUMENTS);
+		}
 	}
 	
 }
@@ -129,12 +131,14 @@ E_ERROR_TYPE CTree::eParseVariableValues(std::string sInput, char cSeparator)
 	int iOffset = 0;
 	while (iOffset < sInput.length()) {
 		std::string token = CInputParsing::sGetNextTokenFromInput(sInput, cSeparator, iOffset);
-		bool bIsNum = CInputParsing::bIsNum(token);
-		if (bIsNum) {
-			pcVariablesData->vInsertValue(strtod(token.c_str(), NULL));
-		}
-		else {
-			return EET_INVALID_ARGUMENT;
+		if (token != "") {
+			bool bIsNum = CInputParsing::bIsNum(token);
+			if (bIsNum) {
+				pcVariablesData->vInsertValue(strtod(token.c_str(), NULL));
+			}
+			else {
+				return EET_INVALID_ARGUMENT;
+			}
 		}
 	}
 	if (pcVariablesData->iSizeComparison() == 1) {
