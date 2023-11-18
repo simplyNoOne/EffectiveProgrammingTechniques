@@ -94,9 +94,14 @@ void CInterface::vRunInterface()
 					std::cout << "There is nothing to compute yet, for the love of G...\n";
 				}
 				else {
-					CError cError;
-					std::string sResult = pcTree->sCompute(sUserResponse, cSeparator, cError);
-					std::cout <<sResult<<std::endl;
+					try {
+						CError cError;
+						std::string sResult = pcTree->sCompute(sUserResponse, cSeparator, cError);
+						std::cout << sResult << std::endl;
+					}
+					catch (divByZero& err) {
+						std::cout << err.what() << "\nat formula\n" << pcTree->sReturnFormula()<<std::endl;
+					}
 				}
 			}
 			else {
@@ -109,6 +114,7 @@ void CInterface::vRunInterface()
 					pcTempTree->vParseFormula(sUserResponse, cError, cSeparator);
 					if (cError.bErrorFound()) {
 						std::cout << cError.sGetErrorMessage() << std::endl;
+						std::cout << "\nFormula to be appended:\n" << pcTempTree->sReturnFormula();
 					}
 
 					std::cout << "\nParsing...\n";

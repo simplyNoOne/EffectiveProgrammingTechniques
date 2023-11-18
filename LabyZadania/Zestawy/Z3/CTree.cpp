@@ -6,19 +6,16 @@
 
 void CTree::vParseFormula(std::string sFormula, CError& cError, char cSeparator)
 {
-	/*int iSkip = 0;
-	while (sFormula[iSkip] == cSeparator) {
-		iSkip++;
-	}
-	sFormula = sFormula.substr(iSkip);*/
 	pcTreeRoot = new CNode(NULL);
+	pcVariablesData = new CVariablesData();
 	int iOffset = 0;
 	E_ERROR_TYPE eError = EET_NONE;
-	pcTreeRoot->bParseNode(sFormula, iOffset, cSeparator, cError, &cVaraiblesData);
+	pcTreeRoot->bParseNode(sFormula, iOffset, cSeparator, cError);
 	if (iOffset < sFormula.length()) {
-		cError.vAppendMessage(false, EET_TOO_MANY_ARGUMENTS);
+		if (CInputParsing::sGetNextTokenFromInput(sFormula, cSeparator, iOffset) != "") {
+			cError.vAppendMessage(false, EET_TOO_MANY_ARGUMENTS);
+		}
 	}
-	
 	
 }
 
@@ -35,14 +32,19 @@ std::string CTree::sReturnVariables()
 	if (pcTreeRoot == nullptr) {
 		return "In order to see variables, enter a formula first, idiot!";
 	}
-	if (cVaraiblesData.iGetVarsNum()  == 0) {
+
+	if (!pcVariablesData->bGetDataValid()) {
+		vVariablesDataFromTree();
+	}
+
+	if (pcVariablesData->iGetVarsNum()  == 0) {
 		return "There are no variables in your formula.";
 	}
 	std::string sResult = "Variables in your formula: ";
-	for (int i = 0; i < cVaraiblesData.iGetVarsNum() - 1; i++) {
-		sResult += cVaraiblesData.sGetVarAtPos(i) + ", ";
+	for (int i = 0; i < pcVariablesData->iGetVarsNum() - 1; i++) {
+		sResult += pcVariablesData->sGetVarAtPos(i) + ", ";
 	}
-	sResult += cVaraiblesData.sGetVarAtPos(cVaraiblesData.iGetVarsNum() - 1);
+	sResult += pcVariablesData->sGetVarAtPos(pcVariablesData->iGetVarsNum() - 1);
 	return sResult;
 }
 
@@ -52,11 +54,18 @@ void CTree::vClearTree()
 		delete pcTreeRoot;
 		pcTreeRoot = nullptr;
 	}
-	cVaraiblesData.vClearVariables();
+	if (pcVariablesData != nullptr) {
+
+		pcVariablesData->vClearVariables();
+		pcVariablesData->vSetDataValid(false);
+	}
 }
 
 std::string CTree::sCompute(std::string& sUserResponse, char cSeparator, CError& cError)
 {
+	if (!pcVariablesData->bGetDataValid()) {
+		vVariablesDataFromTree();
+	}
 	E_ERROR_TYPE eError = eParseVariableValues(sUserResponse, cSeparator);
 	if (eError != EET_NONE) {
 		cError.vAppendMessage(true, eError);
@@ -66,15 +75,15 @@ std::string CTree::sCompute(std::string& sUserResponse, char cSeparator, CError&
 	std::ostringstream oss;
 	oss << "Result for the formula: ";
 	oss << sReturnFormula();
-	if (cVaraiblesData.iGetVarsNum() > 0) {
+	if (pcVariablesData->iGetVarsNum() > 0) {
 		oss << "\nWhere: ";
-		for (int i = 0; i < cVaraiblesData.iGetVarsNum(); i++) {
-			oss << cVaraiblesData.sGetVarAtPos(i) << " = ";
-			oss << cVaraiblesData.dGetValAtPos(i) << ", ";
+		for (int i = 0; i < pcVariablesData->iGetVarsNum(); i++) {
+			oss << pcVariablesData->sGetVarAtPos(i) << " = ";
+			oss << pcVariablesData->dGetValAtPos(i) << ", ";
 		}
 	}
 	oss << "\n";
-	oss << pcTreeRoot->dEvaluateNode(&cVaraiblesData);
+	oss << pcTreeRoot->dEvaluateNode(pcVariablesData);
 	return oss.str();
 	
 }
@@ -82,23 +91,20 @@ std::string CTree::sCompute(std::string& sUserResponse, char cSeparator, CError&
 void CTree::operator=(const CTree& cOther)
 {
 	pcTreeRoot = new CNode(NULL, *cOther.pcTreeRoot);
-	cVaraiblesData = cOther.cVaraiblesData;
+	pcVariablesData = new CVariablesData(*cOther.pcVariablesData);
 }
 
 CTree CTree::operator+(const CTree& cOther)const
 {
 	CTree cResult = *this;
+	cResult.pcVariablesData->vSetDataValid(false);
 	if (cResult.pcTreeRoot->eGetNodeType() == ENT_OPERATION) {
 
-		cResult.pcTreeRoot->vAttachNodeToLastElement(cOther.pcTreeRoot, &cResult.cVaraiblesData);
+		cResult.pcTreeRoot->vAttachNodeToLastElement(cOther.pcTreeRoot);
 	}
 	else {
-		cResult.cVaraiblesData.vClearVariables();
 		delete cResult.pcTreeRoot;
 		cResult.pcTreeRoot = new CNode(NULL, *cOther.pcTreeRoot);
-	}
-	for (int i = 0; i < cOther.cVaraiblesData.iGetVarsNum() ; i++) {
-		cResult.cVaraiblesData.vAddVariable(cOther.cVaraiblesData.sGetVarAtPos(i));
 	}
 	return cResult;
 }
@@ -111,7 +117,7 @@ CTree CTree::cReplaceNodeWNode(CNode* pcToRep, CNode* pcNew)
 	while (pvpcKids->at(i) != pcToRep) {
 		i++;
 	}
-	cVaraiblesData.vRemoveVarsInNode(pcToRep);
+	pcVariablesData->vSetDataValid(false);
 	delete pvpcKids->at(i);
 	pvpcKids->at(i) = pcNew;
 	pcNew->vSetParent(pcParent);
@@ -121,23 +127,32 @@ CTree CTree::cReplaceNodeWNode(CNode* pcToRep, CNode* pcNew)
 
 E_ERROR_TYPE CTree::eParseVariableValues(std::string sInput, char cSeparator)
 {
-	cVaraiblesData.vClearValues();
+	pcVariablesData->vClearValues();
 	int iOffset = 0;
 	while (iOffset < sInput.length()) {
-		std::string token = CNode::sGetNextTokenFromInput(sInput, cSeparator, iOffset);
-		bool bIsNum = CNode::bIsNum(token);
-		if (bIsNum) {
-			cVaraiblesData.vInsertValue(strtod(token.c_str(), NULL));
-		}
-		else {
-			return EET_INVALID_ARGUMENT;
+		std::string token = CInputParsing::sGetNextTokenFromInput(sInput, cSeparator, iOffset);
+		if (token != "") {
+			bool bIsNum = CInputParsing::bIsNum(token);
+			if (bIsNum) {
+				pcVariablesData->vInsertValue(strtod(token.c_str(), NULL));
+			}
+			else {
+				return EET_INVALID_ARGUMENT;
+			}
 		}
 	}
-	if (cVaraiblesData.iSizeComparison() == 1) {
+	if (pcVariablesData->iSizeComparison() == 1) {
 		return EET_TOO_MANY_ARGUMENTS;
 	}
-	if (cVaraiblesData.iSizeComparison() == -1) {
+	if (pcVariablesData->iSizeComparison() == -1) {
 		return EET_MISSING_ARGUMENT;
 	}
 	return EET_NONE;
+}
+
+void CTree::vVariablesDataFromTree()
+{
+	pcVariablesData->vClearVariables();
+	pcTreeRoot->vAddVariablesFromNode(pcVariablesData);
+	pcVariablesData->vSetDataValid(true);
 }

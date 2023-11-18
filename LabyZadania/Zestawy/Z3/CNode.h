@@ -9,25 +9,28 @@ class CVariablesData;
 
 class CNode {
 public:
-	inline CNode(CNode* pcParent) { this->pcParent = pcParent; }
+	CNode(CNode* pcParent);
 	CNode(CNode* pcParent, CNode& cOriginal);
 	~CNode();
 
-	void bParseNode(std::string sFormula, int& iOffset, char cSeparator, CError& cError, CVariablesData* cVariables);
+	/** Builds node based on the inputed sFormula*/
+	void bParseNode(std::string sFormula, int& iOffset, char cSeparator, CError& cError);
+	/** Finds the last node in the hierarchy and replaces it*/
+	void vAttachNodeToLastElement(CNode* pcOtherRoot);
+	/** Adds all the variables from node and its children into the variable list*/
+	void vAddVariablesFromNode(CVariablesData* cVariables);
+
 	std::string sNodeRepresentation();
 	
+	double dEvaluateNode(CVariablesData* cVariables);
+
+	inline std::string sGetVarName() { return sVariableName; }
+	inline E_NODE_TYPE eGetNodeType() { return eNodeType; }
 	inline CNode* pcGetParent() { return pcParent; }
-	inline void vSetParent(CNode* pcNewParent) { pcParent = pcNewParent; }
 	inline std::vector<CNode*>* pvpcGetChildren() { return &vpcChildren; }
 
-	double dEvaluateNode(CVariablesData* cVariables);
-	static std::string sGetNextTokenFromInput(std::string sInput, char cSeparator, int& iOffset);
-	static bool bIsNum(std::string& sToCheck);
-
-	inline E_NODE_TYPE eGetNodeType() { return eNodeType; }
-
-	void vAttachNodeToLastElement(CNode* pcOtherRoot, CVariablesData* cVariables);
-	std::string sGetVarName() { return sVariableName; }
+	inline void vSetParent(CNode* pcNewParent) { pcParent = pcNewParent; }	
+		
 private:
 	CNode* pcParent;
 	std::vector<CNode*> vpcChildren;
@@ -36,12 +39,19 @@ private:
 	std::string sVariableName;
 	double dConstantValue;
 
-	void vMakeDefualt();
-
 	//static
 	static std::vector<std::pair<E_OPERATION_TYPE, std::pair<std::string, int>>> vOperationDefs;
+
+private:
+	void vMakeDefualt();
+	double dCalculateOperation(CVariablesData* cVariables);
+	
 	static E_NODE_TYPE eDetermineNodeType(std::string input, int &iNumArguments, E_OPERATION_TYPE& eOpType, std::string& sVarName, double& dValue, E_ERROR_TYPE& eError);
 	
-	double dCalculateOperation(CVariablesData* cVariables);
+};
 
+class CInputParsing {
+public:
+	static std::string sGetNextTokenFromInput(std::string sInput, char cSeparator, int& iOffset);
+	static bool bIsNum(std::string sToCheck);
 };

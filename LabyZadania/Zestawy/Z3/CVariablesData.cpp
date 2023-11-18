@@ -27,28 +27,19 @@ double CVariablesData::dGetVariableData(std::string sVar)
 	return vdVariableValues.at(it);
 }
 
-void CVariablesData::vDecreaseVarUsage(std::string sVar)
+void CVariablesData::vClearVariables()
 {
-	int i = 0;
-	while (i < vsVariables.size() && vsVariables.at(i) != sVar) {
-		i++;
-	}
-	if (--viVariableOccurences.at(i) == 0) {
-		std::vector<int>::iterator itToRemC = viVariableOccurences.begin() + i;
-		viVariableOccurences.erase(itToRemC);
-		std::vector<std::string>::iterator itToRemV = vsVariables.begin() + i;
-		vsVariables.erase(itToRemV);
-	}
+	vsVariables.clear();
+	viVariableOccurences.clear();
+	vdVariableValues.clear();
 }
-
-void CVariablesData::vRemoveVarsInNode(CNode* pcNode)
+int CVariablesData::iSizeComparison() const
 {
-	if (pcNode->eGetNodeType() == ENT_VARIABLE) {
-		vDecreaseVarUsage(pcNode->sGetVarName());
+	if (vdVariableValues.size() > vsVariables.size()) {
+		return 1;
 	}
-	else if (pcNode->eGetNodeType() == ENT_OPERATION) {
-		for (int i = 0; i < pcNode->pvpcGetChildren()->size(); i++) {
-			vRemoveVarsInNode(pcNode->pvpcGetChildren()->at(i));
-		}
+	if (vdVariableValues.size() < vsVariables.size()) {
+		return -1;
 	}
+	return 0;
 }

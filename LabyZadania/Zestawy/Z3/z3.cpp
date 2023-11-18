@@ -7,11 +7,11 @@
 
 void vZ3start()
 {
-	//CInterface* cUserInterface = new CInterface();
+	CInterface* cUserInterface = new CInterface();
 
-	//cUserInterface->vRunInterface();
+	cUserInterface->vRunInterface();
 
-	//delete cUserInterface;
+	delete cUserInterface;
 
 	CTree t1;
 	CError cErr;
