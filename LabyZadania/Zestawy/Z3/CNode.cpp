@@ -13,7 +13,8 @@ std::vector<std::pair<E_OPERATION_TYPE, std::pair<std::string, int>>> CNode::vOp
 	{EOT_COS,{"cos", 1}},
 	{EOT_TAN,{"tan", 1}},
 	{EOT_LOG,{"log", 2}},
-	{EOT_POWER,{"^", 2}}
+	{EOT_POWER,{"^", 2}},
+	{EOT_SUPERSUM, {"supersum", 4}}
 };
 
 CNode::CNode(CNode* pcParent)
@@ -62,7 +63,7 @@ void CNode::bParseNode(std::string sFormula, int& iOffset, char cSeparator, CErr
 	eNodeType = eDetermineNodeType(part, iNumArguments, eOperationType, sVariableName, dConstantValue, eError);
 	cError.vAppendMessage(false, eError, part);
 	if (eNodeType == ENT_OPERATION) {
-		bool bRet = true;
+		
 		for (int i = 0; i < iNumArguments; i++) {
 			vpcChildren.push_back(new CNode(this));
 			vpcChildren.at(i)->bParseNode(sFormula, iOffset, cSeparator, cError);
@@ -177,6 +178,13 @@ double CNode::dCalculateOperation(CVariablesData* cVariables)
 	}
 	else if (eOperationType == EOT_COS) {
 		return std::cos(vpcChildren.at(0)->dEvaluateNode(cVariables));
+	}
+	else if (eOperationType == EOT_SUPERSUM) {
+		double sSum = 0;
+		for (int i = 0; i < 4; i++) {
+			sSum += (vpcChildren.at(i)->dEvaluateNode(cVariables));
+		}
+		return sSum;
 	}
 }
 
