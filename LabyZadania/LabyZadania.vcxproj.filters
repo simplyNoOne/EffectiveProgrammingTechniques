@@ -18,7 +18,7 @@
     <Filter Include="Source Files\Zestawy\Z2">
       <UniqueIdentifier>{0c03e764-9759-4260-8105-03e0e42f6f6a}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\Zestawy\Z3">
+    <Filter Include="Source Files\Zestawy\Z34">
       <UniqueIdentifier>{99d896d1-d9e8-4652-a951-3074897a4d5f}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
@@ -44,14 +44,14 @@
     <ClCompile Include="Zestawy\Z2\tests.cpp">
       <Filter>Source Files\Zestawy\Z2</Filter>
     </ClCompile>
-    <ClCompile Include="Zestawy\Z3\z3.cpp">
-      <Filter>Source Files\Zestawy\Z3</Filter>
+    <ClCompile Include="Zestawy\Z34\CError.cpp">
+      <Filter>Source Files\Zestawy\Z34</Filter>
     </ClCompile>
-    <ClCompile Include="Zestawy\Z3\CInterface.cpp">
-      <Filter>Source Files\Zestawy\Z3</Filter>
+    <ClCompile Include="Zestawy\Z34\CInterface.cpp">
+      <Filter>Source Files\Zestawy\Z34</Filter>
     </ClCompile>
-    <ClCompile Include="Zestawy\Z3\CError.cpp">
-      <Filter>Source Files\Zestawy\Z3</Filter>
+    <ClCompile Include="Zestawy\Z34\z34.cpp">
+      <Filter>Source Files\Zestawy\Z34</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -73,26 +73,26 @@
     <ClInclude Include="Zestawy\Z2\tests.h">
       <Filter>Source Files\Zestawy\Z2</Filter>
     </ClInclude>
-    <ClInclude Include="Zestawy\Z3\z3.h">
-      <Filter>Source Files\Zestawy\Z3</Filter>
+    <ClInclude Include="Zestawy\Z34\CError.h">
+      <Filter>Source Files\Zestawy\Z34</Filter>
     </ClInclude>
-    <ClInclude Include="Zestawy\Z3\CNode.h">
-      <Filter>Source Files\Zestawy\Z3</Filter>
+    <ClInclude Include="Zestawy\Z34\CInterface.h">
+      <Filter>Source Files\Zestawy\Z34</Filter>
     </ClInclude>
-    <ClInclude Include="Zestawy\Z3\CInterface.h">
-      <Filter>Source Files\Zestawy\Z3</Filter>
+    <ClInclude Include="Zestawy\Z34\CNode.h">
+      <Filter>Source Files\Zestawy\Z34</Filter>
     </ClInclude>
-    <ClInclude Include="Zestawy\Z3\CTree.h">
-      <Filter>Source Files\Zestawy\Z3</Filter>
+    <ClInclude Include="Zestawy\Z34\CTree.h">
+      <Filter>Source Files\Zestawy\Z34</Filter>
     </ClInclude>
-    <ClInclude Include="Zestawy\Z3\ETokens.h">
-      <Filter>Source Files\Zestawy\Z3</Filter>
+    <ClInclude Include="Zestawy\Z34\CVariablesData.h">
+      <Filter>Source Files\Zestawy\Z34</Filter>
     </ClInclude>
-    <ClInclude Include="Zestawy\Z3\CError.h">
-      <Filter>Source Files\Zestawy\Z3</Filter>
+    <ClInclude Include="Zestawy\Z34\ETokens.h">
+      <Filter>Source Files\Zestawy\Z34</Filter>
     </ClInclude>
-    <ClInclude Include="Zestawy\Z3\CVariablesData.h">
-      <Filter>Source Files\Zestawy\Z3</Filter>
+    <ClInclude Include="Zestawy\Z34\z34.h">
+      <Filter>Source Files\Zestawy\Z34</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

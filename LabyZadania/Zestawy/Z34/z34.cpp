@@ -1,13 +1,12 @@
-#include "z3.h"
+#include "z34.h"
 #include "CInterface.h"
 
 #include "CTree.h"
 #include "CError.h"
 
 
-template class CInterface<int>; 
 
-void vZ3start()
+void vZ34start()
 {
 	CInterface < std::string > * cUserInterface = new CInterface<std::string>();
 
