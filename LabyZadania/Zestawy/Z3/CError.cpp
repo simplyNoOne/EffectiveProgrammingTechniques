@@ -38,7 +38,7 @@ std::string CError::sMatchMessage(bool bComputing, E_ERROR_TYPE eType){
 	
 	if (bComputing) {
 		if (eType == EET_INVALID_ARGUMENT) {
-			return "Variables can only be numbers, didn't you know?";
+			return "Illegal variable values, are you a 3-year-old?";
 		}
 		if (eType == EET_MISSING_ARGUMENT) {
 			return "You didn't pass in enough values for variables, can't you count?";
