@@ -47,10 +47,10 @@
     <ClCompile Include="Zestawy\Z34\CError.cpp">
       <Filter>Source Files\Zestawy\Z34</Filter>
     </ClCompile>
-    <ClCompile Include="Zestawy\Z34\CInterface.cpp">
+    <ClCompile Include="Zestawy\Z34\z34.cpp">
       <Filter>Source Files\Zestawy\Z34</Filter>
     </ClCompile>
-    <ClCompile Include="Zestawy\Z34\z34.cpp">
+    <ClCompile Include="Zestawy\Z34\CBossInterface.cpp">
       <Filter>Source Files\Zestawy\Z34</Filter>
     </ClCompile>
   </ItemGroup>
@@ -92,6 +92,9 @@
       <Filter>Source Files\Zestawy\Z34</Filter>
     </ClInclude>
     <ClInclude Include="Zestawy\Z34\z34.h">
+      <Filter>Source Files\Zestawy\Z34</Filter>
+    </ClInclude>
+    <ClInclude Include="Zestawy\Z34\CBossInterface.h">
       <Filter>Source Files\Zestawy\Z34</Filter>
     </ClInclude>
   </ItemGroup>

@@ -3,7 +3,7 @@
 #include<vector>
 #include <string>
 #include "ETokens.h"
-#include "CVariablesData.h"
+//#include "CVariablesData.h"
 
 #include "CNode.h"
 
@@ -47,7 +47,7 @@ private:
 
 
 template <typename T>
-void CTree<T>::vParseFormula(std::string sFormula, CError& cError, char cSeparator)
+inline void CTree<T>::vParseFormula(std::string sFormula, CError& cError, char cSeparator)
 {
 	pcTreeRoot = new CNode<T>(NULL);
 	pcVariablesData = new CVariablesData<T>();
@@ -63,7 +63,7 @@ void CTree<T>::vParseFormula(std::string sFormula, CError& cError, char cSeparat
 }
 
 template <typename T>
-std::string CTree<T>::sReturnFormula()
+inline std::string CTree<T>::sReturnFormula()
 {
 	if (pcTreeRoot == nullptr) {
 		return "You haven't entered a formula yet.";
@@ -72,7 +72,7 @@ std::string CTree<T>::sReturnFormula()
 }
 
 template <typename T>
-std::string CTree<T>::sReturnVariables()
+inline std::string CTree<T>::sReturnVariables()
 {
 	if (pcTreeRoot == nullptr) {
 		return "In order to see variables, enter a formula first, idiot!";
@@ -94,21 +94,20 @@ std::string CTree<T>::sReturnVariables()
 }
 
 template <typename T>
-void CTree<T>::vClearTree()
+inline void CTree<T>::vClearTree()
 {
 	if (pcTreeRoot != nullptr) {
 		delete pcTreeRoot;
 		pcTreeRoot = nullptr;
 	}
 	if (pcVariablesData != nullptr) {
-
 		pcVariablesData->vClearVariables();
 		pcVariablesData->vSetDataValid(false);
 	}
 }
 
 template <typename T>
-std::string CTree<T>::sCompute(std::string& sUserResponse, char cSeparator, CError& cError)
+inline std::string CTree<T>::sCompute(std::string& sUserResponse, char cSeparator, CError& cError)
 {
 	if (!pcVariablesData->bGetDataValid()) {
 		vVariablesDataFromTree();
@@ -136,14 +135,14 @@ std::string CTree<T>::sCompute(std::string& sUserResponse, char cSeparator, CErr
 }
 
 template <typename T>
-void CTree<T>::operator=(const CTree& cOther)
+inline void CTree<T>::operator=(const CTree& cOther)
 {
 	pcTreeRoot = new CNode<T>(NULL, *cOther.pcTreeRoot);
 	pcVariablesData = new CVariablesData<T>(*cOther.pcVariablesData);
 }
 
 template <typename T>
-CTree<T> CTree<T>::operator+(const CTree& cOther)const
+inline CTree<T> CTree<T>::operator+(const CTree& cOther)const
 {
 	CTree cResult = *this;
 	cResult.pcVariablesData->vSetDataValid(false);
@@ -159,7 +158,7 @@ CTree<T> CTree<T>::operator+(const CTree& cOther)const
 }
 
 template <typename T>
-CTree<T> CTree<T>::cReplaceNodeWNode(CNode<T>* pcToRep, CNode<T>* pcNew)
+inline CTree<T> CTree<T>::cReplaceNodeWNode(CNode<T>* pcToRep, CNode<T>* pcNew)
 {
 	CNode<T>* pcParent = pcToRep->pcGetParent();
 	std::vector<CNode<T>*>* pvpcKids = pcParent->pvpcGetChildren();
@@ -176,14 +175,21 @@ CTree<T> CTree<T>::cReplaceNodeWNode(CNode<T>* pcToRep, CNode<T>* pcNew)
 }
 
 template <typename T>
-E_ERROR_TYPE CTree<T>::eParseVariableValues(std::string sInput, char cSeparator)
+inline E_ERROR_TYPE CTree<T>::eParseVariableValues(std::string sInput, char cSeparator)
 {
 	pcVariablesData->vClearValues();
 	int iOffset = 0;
 	while (iOffset < sInput.length()) {
 		std::string token = CInputParsing::sGetNextTokenFromInput(sInput, cSeparator, iOffset);
 		if (token != "") {
-			bool bIsNum = CInputParsing::bIsNum(token);
+			bool bIsNum = false;
+			double d;
+			if (typeid(T) == typeid(double)) {
+				bIsNum = CInputParsing::bIsNum(token, false);
+			}
+			else {
+				bIsNum = CInputParsing::bIsNum(token);
+			}
 			if (bIsNum) {
 				pcVariablesData->vInsertValue(strtod(token.c_str(), NULL));
 			}
@@ -202,7 +208,7 @@ E_ERROR_TYPE CTree<T>::eParseVariableValues(std::string sInput, char cSeparator)
 }
 
 template <>
-E_ERROR_TYPE CTree<std::string>::eParseVariableValues(std::string sInput, char cSeparator)
+inline E_ERROR_TYPE CTree<std::string>::eParseVariableValues(std::string sInput, char cSeparator)
 {
 	pcVariablesData->vClearValues();
 	int iOffset = 0;
@@ -226,7 +232,7 @@ E_ERROR_TYPE CTree<std::string>::eParseVariableValues(std::string sInput, char c
 }
 
 template <typename T>
-void CTree<T>::vVariablesDataFromTree()
+inline void CTree<T>::vVariablesDataFromTree()
 {
 	pcVariablesData->vClearVariables();
 	pcTreeRoot->vAddVariablesFromNode(pcVariablesData);

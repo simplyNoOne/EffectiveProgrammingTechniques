@@ -1,16 +1,12 @@
 #include "z34.h"
-#include "CInterface.h"
-
-#include "CTree.h"
-#include "CError.h"
-
-
+#include "CBossInterface.h"
 
 void vZ34start()
 {
-	CInterface < std::string > * cUserInterface = new CInterface<std::string>();
+	//CNode<int>* dsdf = new CNode<int>(nullptr);
+	CBossInterface* cUserInterface = new CBossInterface();
 
-	cUserInterface->vRunInterface();
+	cUserInterface->vRun();
 
 	delete cUserInterface;
 

@@ -13,10 +13,10 @@
 //#include <iomanip>
 template <typename T> class CInterface {
 public:
-	inline CInterface() { pcTree = nullptr; }
+	inline CInterface() { pcTree = new CTree<T>(); }
 	inline ~CInterface() { delete pcTree; }
 
-	void vRunInterface();
+	bool vRunInterface();
 
 	//static
 	static void vDisplayOperations();
@@ -35,7 +35,7 @@ template <typename T>
 char CInterface<T>::cSeparator = ' ';
 
 template <typename T>
-void CInterface<T>::vDisplayOperations()
+inline void CInterface<T>::vDisplayOperations()
 {
 	std::cout << "Look at all the stuff you can do:\n"
 		<< "\tenter <formula>\n"
@@ -43,12 +43,13 @@ void CInterface<T>::vDisplayOperations()
 		<< "\tprint - show tree\n"
 		<< "\tcomp <var1> ... <varN> - calculate formula with provided variables\n"
 		<< "\tjoin <formula> - try adding new formula tree to the current tree\n"
+		<< "\tswitch - change the formula type\n"
 		<< "\tquit\n";
 
 }
 
 template <typename T>
-std::string CInterface<T>::vGetUserInput()
+inline std::string CInterface<T>::vGetUserInput()
 {
 	std::cout << "So, what do you want?: ";
 	std::cin >> std::ws;
@@ -58,7 +59,7 @@ std::string CInterface<T>::vGetUserInput()
 }
 
 template <typename T>
-E_USER_ACTION CInterface<T>::eInterpretUserAction(std::string& sUserResponse)
+inline E_USER_ACTION CInterface<T>::eInterpretUserAction(std::string& sUserResponse)
 {
 	int iSepFound = sUserResponse.find(cSeparator);
 	std::string keyword;
@@ -89,6 +90,9 @@ E_USER_ACTION CInterface<T>::eInterpretUserAction(std::string& sUserResponse)
 	else if (keyword == "vars") {
 		return EUA_VARS;
 	}
+	else if (keyword == "switch") {
+		return EUA_SWITCH;
+	}
 	else if (keyword == "quit") {
 		return EUA_QUIT;
 	}
@@ -96,17 +100,16 @@ E_USER_ACTION CInterface<T>::eInterpretUserAction(std::string& sUserResponse)
 }
 
 template <typename T>
-void CInterface<T>::vRunInterface()
+inline bool CInterface<T>::vRunInterface()
 {
-	std::cout << std::fixed << std::setprecision(3);
-	pcTree = new CTree<T>();
+	pcTree->vClearTree();
 	E_USER_ACTION eAction = EUA_NONE;
-	while (eAction != EUA_QUIT) {
+	while (eAction != EUA_QUIT && eAction != EUA_SWITCH) {
 		std::system("cls");
 		vDisplayOperations();
 		std::string sUserResponse = vGetUserInput();
 		eAction = eInterpretUserAction(sUserResponse);
-		if (eAction != EUA_QUIT && eAction != EUA_NONE) {
+		if (eAction != EUA_QUIT && eAction != EUA_SWITCH && eAction != EUA_NONE) {
 			if (eAction == EUA_ENTER) {
 				CError cError;
 				pcTree->vClearTree();
@@ -162,6 +165,7 @@ void CInterface<T>::vRunInterface()
 
 		}
 	}
+	return eAction == EUA_SWITCH;
 }
 
 

@@ -40,7 +40,7 @@ private:
 
 
 template <typename T>
-void CVariablesData<T>::vAddVariable(std::string sVar) {
+inline void CVariablesData<T>::vAddVariable(std::string sVar) {
 	int it = 0;
 	while (it < vsVariables.size() && vsVariables.at(it) != sVar) {
 		it++;
@@ -55,7 +55,7 @@ void CVariablesData<T>::vAddVariable(std::string sVar) {
 }
 
 template <typename T>
-T CVariablesData<T>::dGetVariableData(std::string sVar) {
+inline T CVariablesData<T>::dGetVariableData(std::string sVar) {
 	int it = 0;
 	while (vsVariables.at(it) != sVar) {
 		it++;
@@ -75,7 +75,7 @@ inline std::string CVariablesData<std::string>::dGetValAtPos(int iPos) const
 }
 
 template <>
-std::string CVariablesData<std::string>::dGetVariableData(std::string sVar) {
+inline std::string CVariablesData<std::string>::dGetVariableData(std::string sVar) {
 	int it = 0;
 	while (vsVariables.at(it) != sVar) {
 		it++;
@@ -84,14 +84,14 @@ std::string CVariablesData<std::string>::dGetVariableData(std::string sVar) {
 }
 
 template <typename T>
-void CVariablesData<T>::vClearVariables() {
+inline void CVariablesData<T>::vClearVariables() {
 	vsVariables.clear();
 	viVariableOccurences.clear();
 	vdVariableValues.clear();
 }
 
 template <typename T>
-int CVariablesData<T>::iSizeComparison() const {
+inline int CVariablesData<T>::iSizeComparison() const {
 	if (vdVariableValues.size() > vsVariables.size()) {
 		return 1;
 	}

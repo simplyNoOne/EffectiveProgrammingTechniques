@@ -25,14 +25,14 @@ public:
 
 	
 public:
-	CNode(CNode* pcParent);
-	CNode(CNode* pcParent, CNode& cOriginal);
+	CNode(CNode<T>* pcParent);
+	CNode(CNode<T>* pcParent, CNode<T>& cOriginal);
 	~CNode();
 
 	/** Builds node based on the inputed sFormula*/
 	void bParseNode(std::string sFormula, int& iOffset, char cSeparator, CError& cError);
 	/** Finds the last node in the hierarchy and replaces it*/
-	void vAttachNodeToLastElement(CNode* pcOtherRoot);
+	void vAttachNodeToLastElement(CNode<T>* pcOtherRoot);
 	/** Adds all the variables from node and its children into the variable list*/
 	void vAddVariablesFromNode(CVariablesData<T>* cVariables);
 
@@ -42,7 +42,7 @@ public:
 
 	inline std::string sGetVarName() { return sVariableName; }
 	inline E_NODE_TYPE eGetNodeType() { return eNodeType; }
-	inline CNode* pcGetParent() { return pcParent; }
+	inline CNode<T>* pcGetParent() { return pcParent; }
 	inline std::vector<CNode*>* pvpcGetChildren() { return &vpcChildren; }
 
 	inline void vSetParent(CNode* pcNewParent) { pcParent = pcNewParent; }	
@@ -87,7 +87,7 @@ std::vector<std::pair<E_OPERATION_TYPE, std::pair<std::string, int>>> CNode<T>::
 };
 
 template <typename T>
-CNode<T>::CNode(CNode* pcParent)
+inline CNode<T>::CNode(CNode<T>* pcParent)
 {
 	this->pcParent = pcParent;
 	eNodeType = ENT_NONE;
@@ -96,7 +96,7 @@ CNode<T>::CNode(CNode* pcParent)
 }
 
 template <>
-CNode<std::string>::CNode(CNode* pcParent)
+inline CNode<std::string>::CNode(CNode<std::string>* pcParent)
 {
 	this->pcParent = pcParent;
 	eNodeType = ENT_NONE;
@@ -105,7 +105,7 @@ CNode<std::string>::CNode(CNode* pcParent)
 }
 
 template <typename T>
-CNode<T>::CNode(CNode* pcParent, CNode& cOriginal)
+inline CNode<T>::CNode(CNode* pcParent, CNode<T>& cOriginal)
 {
 	this->pcParent = pcParent;
 	this->eOperationType = cOriginal.eOperationType;
@@ -118,14 +118,14 @@ CNode<T>::CNode(CNode* pcParent, CNode& cOriginal)
 }
 
 template <typename T>
-CNode<T>::~CNode() {
+inline CNode<T>::~CNode() {
 	for (int i = 0; i < vpcChildren.size(); i++) {
 		delete vpcChildren.at(i);
 	}
 }
 
 template <typename T>
-void CNode<T>::bParseNode(std::string sFormula, int& iOffset, char cSeparator, CError& cError) {
+inline void CNode<T>::bParseNode(std::string sFormula, int& iOffset, char cSeparator, CError& cError) {
 
 	if (sFormula.length() <= iOffset) {
 		this->vMakeDefualt();
@@ -147,7 +147,7 @@ void CNode<T>::bParseNode(std::string sFormula, int& iOffset, char cSeparator, C
 	if (eNodeType == ENT_OPERATION) {
 
 		for (int i = 0; i < iNumArguments; i++) {
-			vpcChildren.push_back(new CNode(this));
+			vpcChildren.push_back(new CNode<T>(this));
 			vpcChildren.at(i)->bParseNode(sFormula, iOffset, cSeparator, cError);
 			cError.vAppendMessage(false, part);
 		}
@@ -156,22 +156,22 @@ void CNode<T>::bParseNode(std::string sFormula, int& iOffset, char cSeparator, C
 }
 
 template <typename T>
-void CNode<T>::vAttachNodeToLastElement(CNode* pcOtherRoot)
+inline void CNode<T>::vAttachNodeToLastElement(CNode<T>* pcOtherRoot)
 {
 	if (eNodeType == ENT_OPERATION) {
-		CNode* pcLastChild = vpcChildren.at(vpcChildren.size() - 1);
+		CNode<T>* pcLastChild = vpcChildren.at(vpcChildren.size() - 1);
 		if (pcLastChild->eNodeType == ENT_OPERATION) {
 			pcLastChild->vAttachNodeToLastElement(pcOtherRoot);
 		}
 		else {
 			delete pcLastChild;
-			vpcChildren.at(vpcChildren.size() - 1) = new CNode(this, *pcOtherRoot);
+			vpcChildren.at(vpcChildren.size() - 1) = new CNode<T>(this, *pcOtherRoot);
 		}
 	}
 }
 
 template <typename T>
-void CNode<T>::vAddVariablesFromNode(CVariablesData<T>* cVariables)
+inline void CNode<T>::vAddVariablesFromNode(CVariablesData<T>* cVariables)
 {
 	if (eNodeType == ENT_VARIABLE) {
 		cVariables->vAddVariable(sVariableName);
@@ -184,7 +184,7 @@ void CNode<T>::vAddVariablesFromNode(CVariablesData<T>* cVariables)
 }
 
 template <>
-std::string CNode<std::string>::sNodeRepresentation()
+inline std::string CNode<std::string>::sNodeRepresentation()
 {
 	std::string sToReturn;
 	if (eNodeType == ENT_CONSTANT) {
@@ -211,7 +211,7 @@ std::string CNode<std::string>::sNodeRepresentation()
 }
 
 template <typename T>
-std::string CNode<T>::sNodeRepresentation()
+inline std::string CNode<T>::sNodeRepresentation()
 {
 	std::string sToReturn;
 	if (eNodeType == ENT_CONSTANT) {
@@ -238,7 +238,7 @@ std::string CNode<T>::sNodeRepresentation()
 }
 
 template <typename T>
-T CNode<T>::dEvaluateNode(CVariablesData<T>* cVariables)
+inline T CNode<T>::dEvaluateNode(CVariablesData<T>* cVariables)
 {
 	if (eNodeType == ENT_CONSTANT) {
 		return dConstantValue;
@@ -254,7 +254,7 @@ T CNode<T>::dEvaluateNode(CVariablesData<T>* cVariables)
 
 //private section
 template <typename T>
-void CNode<T>::vMakeDefualt()
+inline void CNode<T>::vMakeDefualt()
 {
 	eNodeType = ENT_CONSTANT;
 	eOperationType = EDT_NONE;
@@ -262,7 +262,7 @@ void CNode<T>::vMakeDefualt()
 }
 
 template <>
-void CNode<std::string>::vMakeDefualt()
+inline void CNode<std::string>::vMakeDefualt()
 {
 	eNodeType = ENT_CONSTANT;
 	eOperationType = EDT_NONE;
@@ -270,7 +270,7 @@ void CNode<std::string>::vMakeDefualt()
 }
 
 template <>
-double CNode<double>::dCalculateOperation(CVariablesData<double>* cVariables)
+inline double CNode<double>::dCalculateOperation(CVariablesData<double>* cVariables)
 {
 	if (eOperationType == EOT_ADDITION) {
 		return vpcChildren.at(0)->dEvaluateNode(cVariables) + vpcChildren.at(1)->dEvaluateNode(cVariables);
@@ -312,7 +312,7 @@ double CNode<double>::dCalculateOperation(CVariablesData<double>* cVariables)
 
 //mnozymy razy 1000
 template <>
-int CNode<int>::dCalculateOperation(CVariablesData<int>* cVariables)
+inline int CNode<int>::dCalculateOperation(CVariablesData<int>* cVariables)
 {
 	if (eOperationType == EOT_ADDITION) {
 		return vpcChildren.at(0)->dEvaluateNode(cVariables) + vpcChildren.at(1)->dEvaluateNode(cVariables);
@@ -352,7 +352,7 @@ int CNode<int>::dCalculateOperation(CVariablesData<int>* cVariables)
 }
 
 template <>
-std::string CNode<std::string>::dCalculateOperation(CVariablesData<std::string>* cVariables)
+inline std::string CNode<std::string>::dCalculateOperation(CVariablesData<std::string>* cVariables)
 {
 	if (eOperationType == EOT_ADDITION) {
 		return std::string(vpcChildren.at(0)->dEvaluateNode(cVariables)) + std::string(vpcChildren.at(1)->dEvaluateNode(cVariables));
@@ -369,7 +369,7 @@ std::string CNode<std::string>::dCalculateOperation(CVariablesData<std::string>*
 	}
 	
 	else if (eOperationType == EOT_SUPERSUM) {
-		std::string sSum = 0;
+		std::string sSum = "";
 		for (int i = 0; i < 4; i++) {
 			sSum += (vpcChildren.at(i)->dEvaluateNode(cVariables));
 		}
@@ -379,14 +379,14 @@ std::string CNode<std::string>::dCalculateOperation(CVariablesData<std::string>*
 
 
 template <typename T>
-E_NODE_TYPE CNode<T>::eDetermineNodeType(std::string input, int& iNumArguments, E_OPERATION_TYPE& eOpType, std::string& sVarName, T& dValue, E_ERROR_TYPE& eError)
+inline E_NODE_TYPE CNode<T>::eDetermineNodeType(std::string input, int& iNumArguments, E_OPERATION_TYPE& eOpType, std::string& sVarName, T& dValue, E_ERROR_TYPE& eError)
 {
 	return ENT_NONE;
 }
 
 
 template <>
-E_NODE_TYPE CNode<double>::eDetermineNodeType(std::string input, int& iNumArguments, E_OPERATION_TYPE& eOpType, std::string& sVarName, double& dValue, E_ERROR_TYPE& eError)
+inline E_NODE_TYPE CNode<double>::eDetermineNodeType(std::string input, int& iNumArguments, E_OPERATION_TYPE& eOpType, std::string& sVarName, double& dValue, E_ERROR_TYPE& eError)
 {
 	int iOperationId = 0;
 	while (iOperationId < vOperationDefs.size()) {
@@ -424,7 +424,7 @@ E_NODE_TYPE CNode<double>::eDetermineNodeType(std::string input, int& iNumArgume
 
 
 template <>
-E_NODE_TYPE CNode<int>::eDetermineNodeType(std::string input, int& iNumArguments, E_OPERATION_TYPE& eOpType, std::string& sVarName, int& dValue, E_ERROR_TYPE& eError)
+inline E_NODE_TYPE CNode<int>::eDetermineNodeType(std::string input, int& iNumArguments, E_OPERATION_TYPE& eOpType, std::string& sVarName, int& dValue, E_ERROR_TYPE& eError)
 {
 	int iOperationId = 0;
 	while (iOperationId < vOperationDefs.size()) {
@@ -462,7 +462,7 @@ E_NODE_TYPE CNode<int>::eDetermineNodeType(std::string input, int& iNumArguments
 
 
 template <>
-E_NODE_TYPE CNode<std::string>::eDetermineNodeType(std::string input, int& iNumArguments, E_OPERATION_TYPE& eOpType, std::string& sVarName, std::string& dValue, E_ERROR_TYPE& eError)
+inline E_NODE_TYPE CNode<std::string>::eDetermineNodeType(std::string input, int& iNumArguments, E_OPERATION_TYPE& eOpType, std::string& sVarName, std::string& dValue, E_ERROR_TYPE& eError)
 {
 	int iOperationId = 0;
 	while (iOperationId < vOperationDefs.size()) {
@@ -501,7 +501,7 @@ E_NODE_TYPE CNode<std::string>::eDetermineNodeType(std::string input, int& iNumA
 //InputParsing
 
 
-std::string CInputParsing::sGetNextTokenFromInput(std::string sInput, char cSeparator, int& iOffset)
+inline std::string CInputParsing::sGetNextTokenFromInput(std::string sInput, char cSeparator, int& iOffset)
 {
 	while (iOffset < sInput.length() && sInput.at(iOffset) == cSeparator) {
 		iOffset++;
@@ -516,7 +516,7 @@ std::string CInputParsing::sGetNextTokenFromInput(std::string sInput, char cSepa
 }
 
 
-bool CInputParsing::bIsNum(std::string sToCheck, bool bIsInt) {
+inline bool CInputParsing::bIsNum(std::string sToCheck, bool bIsInt) {
 	if (sToCheck.at(0) == '-') {
 		sToCheck = sToCheck.substr(1);
 	}
@@ -546,13 +546,13 @@ bool CInputParsing::bIsNum(std::string sToCheck, bool bIsInt) {
 	return true;
 }
 
-bool CInputParsing::bIsStringConst(std::string sToCheck)
+inline bool CInputParsing::bIsStringConst(std::string sToCheck)
 {
 	return sToCheck.at(0) == '"' && sToCheck.at(sToCheck.length() - 1) == '"';
 }
 
 
-std::string operator-(const std::string& sL, const std::string& sR)
+inline std::string operator-(const std::string& sL, const std::string& sR)
 {
 	int pos = sL.rfind(sR);
 
@@ -563,7 +563,7 @@ std::string operator-(const std::string& sL, const std::string& sR)
 	return sL;
 }
 
-std::string operator*(const std::string& sL, const std::string& sR)
+inline std::string operator*(const std::string& sL, const std::string& sR)
 {
 	if (sR == "") {
 		return sL;
@@ -581,7 +581,7 @@ std::string operator*(const std::string& sL, const std::string& sR)
 	return sRes;
 }
 
-std::string operator/(const std::string& sL, const std::string& sR)
+inline std::string operator/(const std::string& sL, const std::string& sR)
 {
 	if (sR == "") {
 		return sL;
