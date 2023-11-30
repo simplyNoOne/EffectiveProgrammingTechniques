@@ -72,6 +72,7 @@ public:
 	static bool bIsNum(std::string sToCheck, bool bIsInt = true);
 	static bool bIsStringConst(std::string sToCheck);
 };
+
 template <typename T>
 std::vector<std::pair<E_OPERATION_TYPE, std::pair<std::string, int>>> CNode<T>::vOperationDefs = {
 	{EOT_ADDITION,{"+", 2}},
@@ -80,9 +81,17 @@ std::vector<std::pair<E_OPERATION_TYPE, std::pair<std::string, int>>> CNode<T>::
 	{EOT_DIVISION,{"/", 2}},
 	{EOT_SIN,{"sin", 1}},
 	{EOT_COS,{"cos", 1}},
-	{EOT_TAN,{"tan", 1}},
 	{EOT_LOG,{"log", 2}},
 	{EOT_POWER,{"^", 2}},
+	{EOT_SUPERSUM, {"supersum", 4}}
+};
+
+template <>
+std::vector<std::pair<E_OPERATION_TYPE, std::pair<std::string, int>>> CNode<std::string>::vOperationDefs = {
+	{EOT_ADDITION,{"+", 2}},
+	{EOT_SUBTRACTION,{"-", 2}},
+	{EOT_MULTIPLICATION,{"*", 2}},
+	{EOT_DIVISION,{"/", 2}},
 	{EOT_SUPERSUM, {"supersum", 4}}
 };
 
