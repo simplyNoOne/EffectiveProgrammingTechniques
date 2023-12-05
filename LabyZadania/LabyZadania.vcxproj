@@ -153,6 +153,7 @@
     <ClInclude Include="Zestawy\Z34\CVariablesData.h" />
     <ClInclude Include="Zestawy\Z34\ETokens.h" />
     <ClInclude Include="Zestawy\Z34\z34.h" />
+    <ClInclude Include="Zestawy\Z5\CSmartPtr.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

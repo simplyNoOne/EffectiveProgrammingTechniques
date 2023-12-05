@@ -95,6 +95,16 @@ std::vector<std::pair<E_OPERATION_TYPE, std::pair<std::string, int>>> CNode<std:
 	{EOT_SUPERSUM, {"supersum", 4}}
 };
 
+
+template <>
+std::vector<std::pair<E_OPERATION_TYPE, std::pair<std::string, int>>> CNode<bool>::vOperationDefs = {
+	{EOT_ADDITION,{"+", 2}},
+	{EOT_SUBTRACTION,{"-", 2}},
+	{EOT_MULTIPLICATION,{"*", 2}},
+	{EOT_DIVISION,{"/", 2}},
+};
+
+
 template <typename T>
 inline CNode<T>::CNode(CNode<T>* pcParent)
 {
@@ -386,6 +396,29 @@ inline std::string CNode<std::string>::dCalculateOperation(CVariablesData<std::s
 	}
 }
 
+template <>
+inline bool CNode<bool>::dCalculateOperation(CVariablesData<bool>* cVariables)
+{
+	if (eOperationType == EOT_ADDITION) {
+		return bool(vpcChildren.at(0)->dEvaluateNode(cVariables) + vpcChildren.at(1)->dEvaluateNode(cVariables));
+	}
+	else if (eOperationType == EOT_SUBTRACTION) {
+		return bool(vpcChildren.at(0)->dEvaluateNode(cVariables) - vpcChildren.at(1)->dEvaluateNode(cVariables));
+	}
+	else if (eOperationType == EOT_MULTIPLICATION) {
+		return bool(vpcChildren.at(0)->dEvaluateNode(cVariables) * vpcChildren.at(1)->dEvaluateNode(cVariables));
+	}
+	else if (eOperationType == EOT_DIVISION) {
+		int dDiv = vpcChildren.at(1)->dEvaluateNode(cVariables);
+		if (dDiv == 0) {
+			throw divByZero();
+		}
+		return bool(vpcChildren.at(0)->dEvaluateNode(cVariables) / dDiv);
+	}
+
+}
+
+
 
 template <typename T>
 inline E_NODE_TYPE CNode<T>::eDetermineNodeType(std::string input, int& iNumArguments, E_OPERATION_TYPE& eOpType, std::string& sVarName, T& dValue, E_ERROR_TYPE& eError)
@@ -448,6 +481,43 @@ inline E_NODE_TYPE CNode<int>::eDetermineNodeType(std::string input, int& iNumAr
 	eOpType = EDT_NONE;
 	if (CInputParsing::bIsNum(input)) {
 		dValue = strtod(input.c_str(), NULL);
+		return ENT_CONSTANT;
+	}
+	bool bHasLetter = false;
+	for (int i = 0; i < input.length(); i++) {
+		if (isdigit(input.at(i)) || isalpha(input.at(i))) {
+			sVarName += input.at(i);
+			if (isalpha(input.at(i))) {
+				bHasLetter = true;
+			}
+		}
+		else {
+			eError = EET_INVALID_ARGUMENT;
+		}
+	}
+	if (!bHasLetter) {
+		eError = EET_INVALID_ARGUMENT;
+		sVarName += 'x';
+	}
+	return ENT_VARIABLE;
+}
+
+template <>
+inline E_NODE_TYPE CNode<bool>::eDetermineNodeType(std::string input, int& iNumArguments, E_OPERATION_TYPE& eOpType, std::string& sVarName, bool& dValue, E_ERROR_TYPE& eError)
+{
+	int iOperationId = 0;
+	while (iOperationId < vOperationDefs.size()) {
+		if (vOperationDefs.at(iOperationId).second.first == input) {
+			iNumArguments = vOperationDefs.at(iOperationId).second.second;
+			eOpType = vOperationDefs.at(iOperationId).first;
+			return ENT_OPERATION;
+		}
+		iOperationId++;
+	}
+	iNumArguments = 0;
+	eOpType = EDT_NONE;
+	if (input == "0" || input == "1") {
+		dValue = bool(strtod(input.c_str(), NULL));
 		return ENT_CONSTANT;
 	}
 	bool bHasLetter = false;

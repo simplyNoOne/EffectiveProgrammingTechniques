@@ -18,4 +18,5 @@ private:
 	CInterface<int>* iInterface;
 	CInterface<double>* dInterface;
 	CInterface<std::string>* sInterface;
+	CInterface<bool>* bInterface;
 };

@@ -3,6 +3,7 @@
 #include<vector>
 #include <string>
 #include "ETokens.h"
+#include <utility>
 //#include "CVariablesData.h"
 
 #include "CNode.h"
@@ -17,9 +18,20 @@ template <typename T> class CTree {
 
 public:
 	inline CTree() { pcTreeRoot = nullptr; pcVariablesData = nullptr; }
-	inline ~CTree() { delete pcTreeRoot; delete pcVariablesData; }
+	inline ~CTree() {
+		if (pcTreeRoot != nullptr) {
+			delete pcTreeRoot;
+		}
+		if (pcVariablesData != nullptr) {
+			delete pcVariablesData;
+		}
+	}
+	CTree(CTree&& cOther);
+	CTree(const CTree& cOther);
 
-	void operator=(const CTree& cOther);
+
+	CTree<T> operator=(const CTree& cOther);
+	CTree<T>& operator=(CTree&& cOther);
 	CTree operator+(const CTree& cOther)const;
 
 	void vParseFormula(std::string sFormula, CError& cError, char cSeparator);
@@ -68,7 +80,7 @@ inline std::string CTree<T>::sReturnFormula()
 	if (pcTreeRoot == nullptr) {
 		return "You haven't entered a formula yet.";
 	}
-	return pcTreeRoot->sNodeRepresentation();
+	return std::move(pcTreeRoot->sNodeRepresentation());
 }
 
 template <typename T>
@@ -90,7 +102,7 @@ inline std::string CTree<T>::sReturnVariables()
 		sResult += pcVariablesData->sGetVarAtPos(i) + ", ";
 	}
 	sResult += pcVariablesData->sGetVarAtPos(pcVariablesData->iGetVarsNum() - 1);
-	return sResult;
+	return std::move(sResult);
 }
 
 template <typename T>
@@ -134,17 +146,57 @@ inline std::string CTree<T>::sCompute(std::string& sUserResponse, char cSeparato
 
 }
 
-template <typename T>
-inline void CTree<T>::operator=(const CTree& cOther)
+template<typename T>
+inline CTree<T>::CTree(CTree&& cOther)
+{
+	pcTreeRoot = cOther.pcTreeRoot;
+	pcVariablesData = cOther.pcVariablesData;
+	cOther.pcTreeRoot = nullptr;
+	cOther.pcVariablesData = nullptr;
+}
+
+template<typename T>
+inline CTree<T>::CTree(const CTree& cOther)
 {
 	pcTreeRoot = new CNode<T>(NULL, *cOther.pcTreeRoot);
 	pcVariablesData = new CVariablesData<T>(*cOther.pcVariablesData);
 }
 
 template <typename T>
-inline CTree<T> CTree<T>::operator+(const CTree& cOther)const
+inline CTree<T> CTree<T>::operator=(const CTree<T>& cOther)
 {
-	CTree cResult = *this;
+	if (pcTreeRoot != nullptr) {
+		delete pcTreeRoot;
+	}
+	if (pcVariablesData != nullptr) {
+		delete pcVariablesData;
+	}
+	pcTreeRoot = new CNode<T>(NULL, *cOther.pcTreeRoot);
+	pcVariablesData = new CVariablesData<T>(*cOther.pcVariablesData);
+	return *this;
+}
+
+template<typename T>
+inline CTree<T>& CTree<T>::operator=(CTree&& cOther) 
+{
+	if (pcTreeRoot != nullptr) {
+		delete pcTreeRoot;
+	}
+	if (pcVariablesData != nullptr) {
+		delete pcVariablesData;
+	}
+	pcTreeRoot = cOther.pcTreeRoot;
+	pcVariablesData = cOther.pcVariablesData;
+	cOther.pcTreeRoot = nullptr;
+	cOther.pcVariablesData = nullptr;
+	return *this;
+}
+
+
+template <typename T>
+inline CTree<T> CTree<T>::operator+(const CTree<T>& cOther)const
+{
+	CTree<T> cResult = *this;
 	cResult.pcVariablesData->vSetDataValid(false);
 	if (cResult.pcTreeRoot->eGetNodeType() == ENT_OPERATION) {
 
@@ -154,7 +206,7 @@ inline CTree<T> CTree<T>::operator+(const CTree& cOther)const
 		delete cResult.pcTreeRoot;
 		cResult.pcTreeRoot = new CNode<T>(NULL, *cOther.pcTreeRoot);
 	}
-	return cResult;
+	return (std::move(cResult));
 }
 
 template <typename T>
@@ -171,7 +223,7 @@ inline CTree<T> CTree<T>::cReplaceNodeWNode(CNode<T>* pcToRep, CNode<T>* pcNew)
 	pvpcKids->at(i) = pcNew;
 	pcNew->vSetParent(pcParent);
 
-	return CTree();
+	return this;
 }
 
 template <typename T>
@@ -186,6 +238,9 @@ inline E_ERROR_TYPE CTree<T>::eParseVariableValues(std::string sInput, char cSep
 			double d;
 			if (typeid(T) == typeid(double)) {
 				bIsNum = CInputParsing::bIsNum(token, false);
+			}
+			else if (typeid(T) == typeid(bool)) {
+				bIsNum = (token == "1" || token == "0");
 			}
 			else {
 				bIsNum = CInputParsing::bIsNum(token);

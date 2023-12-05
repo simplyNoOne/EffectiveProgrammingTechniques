@@ -21,6 +21,9 @@
     <Filter Include="Source Files\Zestawy\Z34">
       <UniqueIdentifier>{99d896d1-d9e8-4652-a951-3074897a4d5f}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Zestawy\Z5">
+      <UniqueIdentifier>{47c05f7e-f261-4b85-ae25-5c6a219cf563}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="LabyZadania.cpp">
@@ -96,6 +99,9 @@
     </ClInclude>
     <ClInclude Include="Zestawy\Z34\CBossInterface.h">
       <Filter>Source Files\Zestawy\Z34</Filter>
+    </ClInclude>
+    <ClInclude Include="Zestawy\Z5\CSmartPtr.h">
+      <Filter>Source Files\Zestawy\Z5</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
