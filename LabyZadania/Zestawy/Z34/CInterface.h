@@ -1,15 +1,41 @@
-#include "CInterface.h"
+#pragma once
+
+#include "ETokens.h"
+#include <string>
 
 #include "CTree.h"
 #include <iostream>
-#include <string>
 #include <iomanip>
 #include <cstdlib>
 #include "CError.h"
+//#include <iostream>
 
-char CInterface::cSeparator = ' ';
+//#include <iomanip>
+template <typename T> class CInterface {
+public:
+	inline CInterface() { pcTree = new CTree<T>(); }
+	inline ~CInterface() { delete pcTree; }
 
-void CInterface::vDisplayOperations()
+	bool vRunInterface();
+
+	//static
+	static void vDisplayOperations();
+	static std::string vGetUserInput();
+	static E_USER_ACTION eInterpretUserAction(std::string& sUserResponse);
+	
+private:
+	CTree<T>* pcTree;
+
+	//static
+	static char cSeparator;
+};
+
+
+template <typename T>
+char CInterface<T>::cSeparator = ' ';
+
+template <typename T>
+inline void CInterface<T>::vDisplayOperations()
 {
 	std::cout << "Look at all the stuff you can do:\n"
 		<< "\tenter <formula>\n"
@@ -17,11 +43,13 @@ void CInterface::vDisplayOperations()
 		<< "\tprint - show tree\n"
 		<< "\tcomp <var1> ... <varN> - calculate formula with provided variables\n"
 		<< "\tjoin <formula> - try adding new formula tree to the current tree\n"
+		<< "\tswitch - change the formula type\n"
 		<< "\tquit\n";
-		
+
 }
 
-std::string CInterface::vGetUserInput()
+template <typename T>
+inline std::string CInterface<T>::vGetUserInput()
 {
 	std::cout << "So, what do you want?: ";
 	std::cin >> std::ws;
@@ -30,10 +58,11 @@ std::string CInterface::vGetUserInput()
 	return sResponse;
 }
 
-E_USER_ACTION CInterface::eInterpretUserAction(std::string& sUserResponse)
+template <typename T>
+inline E_USER_ACTION CInterface<T>::eInterpretUserAction(std::string& sUserResponse)
 {
 	int iSepFound = sUserResponse.find(cSeparator);
-	std::string keyword; 
+	std::string keyword;
 	if (iSepFound != std::string::npos) {
 		keyword = sUserResponse.substr(0, iSepFound);
 		sUserResponse = sUserResponse.substr(iSepFound);
@@ -48,46 +77,54 @@ E_USER_ACTION CInterface::eInterpretUserAction(std::string& sUserResponse)
 
 	if (keyword == "enter") {
 		return EUA_ENTER;
-	}else if (keyword == "print") {
+	}
+	else if (keyword == "print") {
 		return EUA_PRINT;
-	}else if (keyword == "comp") {
+	}
+	else if (keyword == "comp") {
 		return EUA_COMP;
-	}else if (keyword == "join") {
+	}
+	else if (keyword == "join") {
 		return EUA_JOIN;
-	}else if (keyword == "vars") {
+	}
+	else if (keyword == "vars") {
 		return EUA_VARS;
-	}else if (keyword == "quit") {
+	}
+	else if (keyword == "switch") {
+		return EUA_SWITCH;
+	}
+	else if (keyword == "quit") {
 		return EUA_QUIT;
 	}
 	return EUA_NONE;
 }
 
-void CInterface::vRunInterface()
+template <typename T>
+inline bool CInterface<T>::vRunInterface()
 {
-	std::cout << std::fixed << std::setprecision(3);
-	pcTree = new CTree();
+	pcTree->vClearTree();
 	E_USER_ACTION eAction = EUA_NONE;
-	while (eAction != EUA_QUIT) {
+	while (eAction != EUA_QUIT && eAction != EUA_SWITCH) {
 		std::system("cls");
 		vDisplayOperations();
 		std::string sUserResponse = vGetUserInput();
 		eAction = eInterpretUserAction(sUserResponse);
-		if (eAction != EUA_QUIT && eAction != EUA_NONE) {
+		if (eAction != EUA_QUIT && eAction != EUA_SWITCH && eAction != EUA_NONE) {
 			if (eAction == EUA_ENTER) {
 				CError cError;
 				pcTree->vClearTree();
 				pcTree->vParseFormula(sUserResponse, cError, cSeparator);
 				if (cError.bErrorFound()) {
 					std::cout << cError.sGetErrorMessage() << std::endl;
-					std::cout<< "\nResulting formula:\n" << pcTree->sReturnFormula();
+					std::cout << "\nResulting formula:\n" << pcTree->sReturnFormula();
 				}
 			}
 			else if (eAction == EUA_PRINT) {
 				std::cout << "Your current formula in Prefix Notation:\n";
-				std::cout << pcTree->sReturnFormula()<<std::endl;
+				std::cout << pcTree->sReturnFormula() << std::endl;
 			}
 			else if (eAction == EUA_VARS) {
-				std::cout<<pcTree->sReturnVariables()<<std::endl;
+				std::cout << pcTree->sReturnVariables() << std::endl;
 			}
 			else if (eAction == EUA_COMP) {
 				if (!pcTree->bExists()) {
@@ -100,7 +137,7 @@ void CInterface::vRunInterface()
 						std::cout << sResult << std::endl;
 					}
 					catch (divByZero& err) {
-						std::cout << err.what() << "\nat formula\n" << pcTree->sReturnFormula()<<std::endl;
+						std::cout << err.what() << "\nat formula\n" << pcTree->sReturnFormula() << std::endl;
 					}
 				}
 			}
@@ -109,7 +146,7 @@ void CInterface::vRunInterface()
 					std::cout << "What do you want to join your formula to? There is nothing there yet, you imbecile\n";
 				}
 				else {
-					CTree* pcTempTree = new CTree();
+					CTree<T>* pcTempTree = new CTree<T>();
 					CError cError;
 					pcTempTree->vParseFormula(sUserResponse, cError, cSeparator);
 					if (cError.bErrorFound()) {
@@ -121,12 +158,14 @@ void CInterface::vRunInterface()
 					*pcTree = *pcTree + *pcTempTree;
 					delete pcTempTree;
 				}
-				
+
 			}
 			std::cout << "\nPress enter to proceed.";
 			std::getline(std::cin, sUserResponse);
-			
+
 		}
 	}
+	return eAction == EUA_SWITCH;
 }
+
 
