@@ -1,5 +1,18 @@
 #pragma once
 
+
+class CRefCounter
+{
+public:
+	CRefCounter() { i_count = 0; }
+	int iAdd() { return(++i_count); }
+	int iDec() { return(--i_count); };
+	int iGet() { return(i_count); }
+private:
+	int i_count;
+};
+
+
 template <class T>
 class CSmartPtr
 {
@@ -17,8 +30,8 @@ public:
 			delete pc_pointer;
 			delete pc_counter;
 		}
-		pc_pointer = pcOther.pc_pointer;
-		pc_counter = pcOther.pc_counter;
+		pc_pointer = cOther.pc_pointer;
+		pc_counter = cOther.pc_counter;
 		pc_counter->iAdd();
 	}
 
@@ -46,14 +59,3 @@ private:
 	T* pc_pointer;
 };
 
-
-class CRefCounter
-{
-public:
-	CRefCounter() { i_count = 0; }
-	int iAdd() { return(++i_count); }
-	int iDec() { return(--i_count); };
-	int iGet() { return(i_count); }
-private:
-	int i_count;
-};
