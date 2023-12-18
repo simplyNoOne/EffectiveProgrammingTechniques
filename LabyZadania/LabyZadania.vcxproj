@@ -137,6 +137,7 @@
     <ClCompile Include="Zestawy\Z34\CBossInterface.cpp" />
     <ClCompile Include="Zestawy\Z34\CError.cpp" />
     <ClCompile Include="Zestawy\Z34\z34.cpp" />
+    <ClCompile Include="Zestawy\Z5\z5.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Zestawy\Z1\CTable.h" />
@@ -154,6 +155,7 @@
     <ClInclude Include="Zestawy\Z34\ETokens.h" />
     <ClInclude Include="Zestawy\Z34\z34.h" />
     <ClInclude Include="Zestawy\Z5\CSmartPtr.h" />
+    <ClInclude Include="Zestawy\Z5\z5.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

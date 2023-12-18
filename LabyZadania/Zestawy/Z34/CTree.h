@@ -4,6 +4,7 @@
 #include <string>
 #include "ETokens.h"
 #include <utility>
+#include <iostream>
 //#include "CVariablesData.h"
 
 #include "CNode.h"
@@ -153,6 +154,7 @@ inline CTree<T>::CTree(CTree&& cOther)
 	pcVariablesData = cOther.pcVariablesData;
 	cOther.pcTreeRoot = nullptr;
 	cOther.pcVariablesData = nullptr;
+	std::cout << "MOVE CTOR\n";
 }
 
 template<typename T>
@@ -189,6 +191,7 @@ inline CTree<T>& CTree<T>::operator=(CTree&& cOther)
 	pcVariablesData = cOther.pcVariablesData;
 	cOther.pcTreeRoot = nullptr;
 	cOther.pcVariablesData = nullptr;
+	std::cout << "MOVE OPR\n";
 	return *this;
 }
 

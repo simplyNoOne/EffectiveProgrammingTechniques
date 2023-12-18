@@ -56,6 +56,9 @@
     <ClCompile Include="Zestawy\Z34\CBossInterface.cpp">
       <Filter>Source Files\Zestawy\Z34</Filter>
     </ClCompile>
+    <ClCompile Include="Zestawy\Z5\z5.cpp">
+      <Filter>Source Files\Zestawy\Z5</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Zestawy\Z1\z1.h">
@@ -101,6 +104,9 @@
       <Filter>Source Files\Zestawy\Z34</Filter>
     </ClInclude>
     <ClInclude Include="Zestawy\Z5\CSmartPtr.h">
+      <Filter>Source Files\Zestawy\Z5</Filter>
+    </ClInclude>
+    <ClInclude Include="Zestawy\Z5\z5.h">
       <Filter>Source Files\Zestawy\Z5</Filter>
     </ClInclude>
   </ItemGroup>
